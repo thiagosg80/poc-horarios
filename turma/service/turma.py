@@ -7,19 +7,20 @@ from turma.model.turma import Turma
 class TurmaService:
     def get_todas(self) -> List[Turma]:
         return [
-            self.__get_turma__('161', self.__get_disciplinas_default()),
-            self.__get_turma__('162', self.__get_disciplinas_default()),
-            self.__get_turma__('171', self.__get_disciplinas_default()),
-            self.__get_turma__('172', self.__get_disciplinas_default()),
-            self.__get_turma__('181', self.__get_disciplinas_default()),
-            self.__get_turma__('182', self.__get_disciplinas_default()),
-            self.__get_turma__('191', self.__get_disciplinas_default()),
-            self.__get_turma__('192', self.__get_disciplinas_default())
+            self.__get_turma__('161', 'manha', self.__get_disciplinas_default()),
+            self.__get_turma__('162', 'tarde', self.__get_disciplinas_default()),
+            self.__get_turma__('171', 'manha', self.__get_disciplinas_default()),
+            self.__get_turma__('172', 'tarde', self.__get_disciplinas_default()),
+            self.__get_turma__('181', 'manha', self.__get_disciplinas_default()),
+            self.__get_turma__('182', 'tarde', self.__get_disciplinas_default()),
+            self.__get_turma__('191', 'manha', self.__get_disciplinas_default()),
+            self.__get_turma__('192', 'tarde', self.__get_disciplinas_default())
         ]
 
-    def __get_turma__(self, id: str, disciplinas: List[Disciplina]) -> Turma:
+    def __get_turma__(self, id: str, turno: str, disciplinas: List[Disciplina]) -> Turma:
         turma = Turma()
         turma.id = id
+        turma.turno = turno
         turma.disciplinas = disciplinas
 
         return turma
