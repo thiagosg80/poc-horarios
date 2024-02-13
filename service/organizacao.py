@@ -1,10 +1,10 @@
 from professor.service.professor import get_professores
-from turma.service.turma import TurmaService
+from turma.service.turma import get_todas_as_turmas
 
 
 class OrganizacaoService:
     def perform(self) -> dict:
-        turmas = TurmaService().get_todas()
+        turmas = get_todas_as_turmas()
         professores = get_professores()
 
         return {
