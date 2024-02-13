@@ -1,8 +1,8 @@
 from flask_restful import Resource
 
-from service.organizacao import OrganizacaoService
+from function.perform_organizacao import perform_organizacao
 
 
 class OrganizacaoController(Resource):
     def get(self) -> dict:
-        return OrganizacaoService().perform()
+        return perform_organizacao()
