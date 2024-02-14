@@ -7,6 +7,7 @@ from turma.function.get_periodos import get_periodos
 from turma.function.get_turmas_map import get_turmas_map
 from turma.function.get_turnos_grade import get_turnos_grade
 from turma.function.grade.get_grade_file import get_grade_file
+from function.set_organizacao import set_organizacao
 from turma.model.grade.periodo import Periodo
 from turma.model.grade.turma import GradeTurma
 from turma.model.grade.dia import GradeDia
@@ -19,6 +20,7 @@ def perform_organizacao() -> Response:
     periodos = get_periodos(list(map(lambda key: key, turmas_map)), dias_da_semana)
     turnos_grade = get_turnos_grade(turmas_map, dias_da_semana, periodos)
     professores = get_professores(turmas_map)
+    [set_organizacao(professor, periodos, turmas_map) for professor in professores]
 
     grade = {
         'turnos': list(map(lambda i: __get_turnos__(i, periodos), turnos_grade))
@@ -28,7 +30,6 @@ def perform_organizacao() -> Response:
 
 
 def __get_turnos__(turno: GradeTurno, periodos: List[Periodo]) -> dict:
-
     return {
         'id': turno.id,
         'dias_da_semana': list(map(lambda i: __get_dias_da_semana__(i, periodos), turno.dias_da_semana))
