@@ -7,12 +7,12 @@ from professor.model.professor import Professor
 
 def get_professores(turmas_map: dict) -> List[Professor]:
     return [
-        __get_professor__('andreia p', 'port', __get_turmas_01__(), turmas_map, __get_disponibilidades_01__()),
-        # __get_professor__('josiane', 'mat', __get_turmas_02__(), __get_disponibilidades_02__()),
-        # __get_professor__('patricia', 'mat', __get_turmas_03__(), __get_disponibilidades_03__()),
-        # __get_professor__('cristian', 'geo', __get_turmas_04__(), __get_disponibilidades_04__()),
-        # __get_professor__('jeferson', 'ingl', __get_turmas_04__(), __get_disponibilidades_05__()),
-        # __get_professor__('robson', 'ef', __get_turmas_04__(), __get_disponibilidades_06__())
+        __get_professor__('andreia p', 'port', __get_turmas_01__(), __get_disponibilidades_01__()),
+        __get_professor__('josiane', 'mat', __get_turmas_02__(), __get_disponibilidades_02__()),
+        __get_professor__('patricia', 'mat', __get_turmas_03__(), __get_disponibilidades_03__()),
+        __get_professor__('cristian', 'geo', __get_turmas_04__(), __get_disponibilidades_04__()),
+        __get_professor__('jeferson', 'ingl', __get_turmas_04__(), __get_disponibilidades_05__()),
+        __get_professor__('robson', 'ef', __get_turmas_04__(), __get_disponibilidades_06__())
     ]
 
 
@@ -54,6 +54,18 @@ def __get_turmas_02__() -> List[str]:
     ]
 
 
+def __get_turmas_03__() -> List[str]:
+    return [
+        '172', '181', '182'
+    ]
+
+
+def __get_turmas_04__() -> List[str]:
+    return [
+        '161', '162', '171', '172', '181', '182', '191', '192'
+    ]
+
+
 def __get_disponibilidades_01__() -> List[Disponibilidade]:
     return [
         __get_disponibilidade__('seg', 'manha', 5),
@@ -76,9 +88,47 @@ def __get_disponibilidades_02__() -> List[Disponibilidade]:
     ]
 
 
+def __get_disponibilidades_03__() -> List[Disponibilidade]:
+    return [
+        __get_disponibilidade__('seg', 'manha', 2),
+        __get_disponibilidade__('qua', 'manha', 3),
+        __get_disponibilidade__('seg', 'tarde', 5),
+        __get_disponibilidade__('qua', 'tarde', 5)
+    ]
+
+
+def __get_disponibilidades_04__() -> List[Disponibilidade]:
+    return [
+        __get_disponibilidade__('seg', 'manha', 4),
+        __get_disponibilidade__('qua', 'manha', 4),
+        __get_disponibilidade__('seg', 'tarde', 3),
+        __get_disponibilidade__('qua', 'tarde', 5)
+    ]
+
+
+def __get_disponibilidades_05__() -> List[Disponibilidade]:
+    return [
+        __get_disponibilidade__('seg', 'manha', 3),
+        __get_disponibilidade__('qui', 'manha', 5),
+        __get_disponibilidade__('seg', 'tarde', 3),
+        __get_disponibilidade__('qui', 'tarde', 5)
+    ]
+
+
+def __get_disponibilidades_06__() -> List[Disponibilidade]:
+    return [
+        __get_disponibilidade__('seg', 'manha', 4),
+        __get_disponibilidade__('qua', 'manha', 1),
+        __get_disponibilidade__('sex', 'manha', 3),
+        __get_disponibilidade__('qua', 'tarde', 2),
+        __get_disponibilidade__('qui', 'tarde', 1),
+        __get_disponibilidade__('sex', 'tarde', 5)
+    ]
+
+
 def __get_disponibilidade__(dia_da_semana: str, turno: str, quantidade_de_periodos: int) -> Disponibilidade:
     disponibilidade = Disponibilidade()
-    disponibilidade.dia_semana = dia_da_semana
+    disponibilidade.dia = dia_da_semana
     disponibilidade.turno = turno
     disponibilidade.quantidade_de_periodos = quantidade_de_periodos
 
