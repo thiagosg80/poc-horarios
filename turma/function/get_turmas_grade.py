@@ -32,7 +32,7 @@ def __set_turnos__(turno: GradeTurno, turmas: List[Turma], dias_da_semana: List[
 
 def __get_turno_dia__(dia_da_semana: str, turmas: List[Turma]) -> TurnoDia:
     turno_dia = TurnoDia()
-    turno_dia.dia = dia_da_semana
+    turno_dia.id = dia_da_semana
     turno_dia.aulas = []
     [__set_aula__(turma, turno_dia) for turma in turmas]
 
