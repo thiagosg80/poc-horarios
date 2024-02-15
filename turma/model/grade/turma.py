@@ -1,5 +1,5 @@
-class Aula:
-    turma: str
+class GradeTurma:
+    id: str
     periodo_1: str = ''
     periodo_2: str = ''
     periodo_3: str = ''

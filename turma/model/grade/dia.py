@@ -1,8 +1,8 @@
 from typing import List
 
-from turma.model.grade.aula import Aula
+from turma.model.grade.turma import GradeTurma
 
 
-class TurnoDia:
+class GradeDia:
     id: str
-    aulas: List[Aula]
+    grade_turmas: List[GradeTurma]
