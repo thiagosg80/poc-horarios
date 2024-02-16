@@ -1,7 +1,8 @@
+from typing import List
+
+from turma.model.grade.periodo import Periodo
+
+
 class GradeTurma:
     id: str
-    periodo_1: str = ''
-    periodo_2: str = ''
-    periodo_3: str = ''
-    periodo_4: str = ''
-    periodo_5: str = ''
+    periodos: List[Periodo]
