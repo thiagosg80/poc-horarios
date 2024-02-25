@@ -2,7 +2,7 @@ from typing import List
 
 from professor.function.get_professores import get_professores
 from turma.function.get_periodos import get_periodos
-from turma.function.get_todas_as_turmas import get_todas_as_turmas
+from turma.function.get_turmas_map import get_turmas_map
 from turma.function.get_turnos_grade import get_turnos_grade
 from turma.model.grade.periodo import Periodo
 from turma.model.grade.turma import GradeTurma
@@ -11,10 +11,10 @@ from turma.model.grade.turno import GradeTurno
 
 
 def perform_organizacao() -> dict:
-    turmas = get_todas_as_turmas()
+    turmas_map = get_turmas_map()
     dias_da_semana = ['seg', 'ter', 'qua', 'qui', 'sex']
-    periodos = get_periodos(list(map(lambda turma: turma.id, turmas)), dias_da_semana)
-    turnos_grade = get_turnos_grade(turmas, dias_da_semana, periodos)
+    periodos = get_periodos(list(map(lambda key: key, turmas_map)), dias_da_semana)
+    turnos_grade = get_turnos_grade(turmas_map, dias_da_semana, periodos)
     professores = get_professores()
 
     return {

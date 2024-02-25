@@ -4,22 +4,21 @@ from turma.model.disciplina import Disciplina
 from turma.model.turma import Turma
 
 
-def get_todas_as_turmas() -> List[Turma]:
-    return [
-        __get_turma__('161', 'manha', __get_disciplinas_default__()),
-        __get_turma__('162', 'tarde', __get_disciplinas_default__()),
-        __get_turma__('171', 'manha', __get_disciplinas_default__()),
-        __get_turma__('172', 'tarde', __get_disciplinas_default__()),
-        __get_turma__('181', 'manha', __get_disciplinas_default__()),
-        __get_turma__('182', 'tarde', __get_disciplinas_default__()),
-        __get_turma__('191', 'manha', __get_disciplinas_default__()),
-        __get_turma__('192', 'tarde', __get_disciplinas_default__())
-    ]
+def get_turmas_map() -> dict:
+    return {
+        '161': __get_turma__('manha', __get_disciplinas_default__()),
+        '162': __get_turma__('tarde', __get_disciplinas_default__()),
+        '171': __get_turma__('manha', __get_disciplinas_default__()),
+        '172': __get_turma__('tarde', __get_disciplinas_default__()),
+        '181': __get_turma__('manha', __get_disciplinas_default__()),
+        '182': __get_turma__('tarde', __get_disciplinas_default__()),
+        '191': __get_turma__('manha', __get_disciplinas_default__()),
+        '192': __get_turma__('tarde', __get_disciplinas_default__())
+    }
 
 
-def __get_turma__(id: str, turno: str, disciplinas: List[Disciplina]) -> Turma:
+def __get_turma__(turno: str, disciplinas: List[Disciplina]) -> Turma:
     turma = Turma()
-    turma.id = id
     turma.turno = turno
     turma.disciplinas = disciplinas
 
