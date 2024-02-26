@@ -20,7 +20,7 @@ def perform_organizacao() -> Response:
     periodos = get_periodos(list(map(lambda key: key, turmas_map)), dias_da_semana)
     turnos_grade = get_turnos_grade(turmas_map, dias_da_semana, periodos)
     professores = get_professores(turmas_map)
-    [set_organizacao(professor, periodos, turmas_map) for professor in professores]
+    set_organizacao(professores, periodos, turmas_map)
 
     grade = {
         'turnos': list(map(lambda i: __get_turnos__(i, periodos), turnos_grade))
