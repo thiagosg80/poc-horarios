@@ -1,0 +1,32 @@
+<div>
+    {{ turno.id }}
+</div>
+
+<div>
+    <table>
+        {% for dia in turno.dias_da_semana %}
+            <tr>
+                <td class="border01">
+                    {{ dia.id }}
+                </td>
+                {% for turma in dia.turmas %}
+                    <td class="border01">
+                        {{ turma.id }}
+                        <table class="margintop03">
+                            {% for periodo in turma.periodos %}
+                                <tr>
+                                    <td>
+                                        {{ periodo.ordem }}
+                                    </td>
+                                    <td>
+                                        {{ periodo.descricao }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+</div>

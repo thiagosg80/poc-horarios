@@ -1,0 +1,24 @@
+<html>
+    <head>
+        <style>
+            .border01 {
+                border: 1px solid grey;
+            }
+
+            .paddingbottom05 {
+                padding-bottom: 25px;
+            }
+
+            .margintop03 {
+                margin-top: 15px;
+            }
+        </style>
+    </head>
+    <body>
+        {% for turno in grade_input.turnos %}
+            <div class="paddingbottom05">
+                {% include 'table.html' %}
+            </div>
+        {% endfor %}
+    </body>
+</html>
