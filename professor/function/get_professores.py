@@ -1,26 +1,52 @@
 from typing import List
 
+from professor.model.aula import Aula
 from professor.model.disponibilidade import Disponibilidade
 from professor.model.professor import Professor
+from turma.model.disciplina import Disciplina
 
 
-def get_professores() -> List[Professor]:
+def get_professores(turmas_map: dict) -> List[Professor]:
     return [
-        __get_professor__('andreia p', 'port', __get_turmas_01__(), __get_disponibilidades_01__()),
-        __get_professor__('josiane', 'mat', __get_turmas_02__(), __get_disponibilidades_02__())
+        __get_professor__('andreia p', 'port', __get_turmas_01__(), turmas_map, __get_disponibilidades_01__()),
+        # __get_professor__('josiane', 'mat', __get_turmas_02__(), __get_disponibilidades_02__()),
+        # __get_professor__('patricia', 'mat', __get_turmas_03__(), __get_disponibilidades_03__()),
+        # __get_professor__('cristian', 'geo', __get_turmas_04__(), __get_disponibilidades_04__()),
+        # __get_professor__('jeferson', 'ingl', __get_turmas_04__(), __get_disponibilidades_05__()),
+        # __get_professor__('robson', 'ef', __get_turmas_04__(), __get_disponibilidades_06__())
     ]
 
 
-def __get_professor__(nome: str, disciplina: str, turmas: List[str], disponibilidades: List[Disponibilidade]) \
-        -> Professor:
+def __get_professor__(nome: str, disciplina: str, turmas: List[str], turmas_map: dict,
+                      disponibilidades: List[Disponibilidade]) -> Professor:
 
     professor = Professor()
     professor.nome = nome
     professor.disciplina = disciplina
-    professor.turmas = turmas
+    professor.aulas = __get_aulas__(turmas, disciplina, turmas_map)
     professor.disponibilidades = disponibilidades
 
     return professor
+
+
+def __get_aulas__(turmas: List[str], disciplina: str, turmas_map: dict) -> List[Aula]:
+    return list(map(lambda i: __get_aula__(i, disciplina, turmas_map), turmas))
+
+
+def __get_aula__(turma: str, disciplina: str, turmas_map: dict) -> Aula:
+    aula = Aula()
+    aula.turma = turma
+    aula.disciplina = disciplina
+    quantidade_periodos = __get_quantidade_periodos__(turmas_map[turma].disciplinas, disciplina)
+    aula.quantidade_maxima_periodos_consecutivos = int(quantidade_periodos / 2) + 1
+
+    return aula
+
+
+def __get_quantidade_periodos__(disciplinas: List[Disciplina], disciplina: str) -> int:
+    filtered = list(filter(lambda i: i.id == disciplina, disciplinas))
+
+    return filtered[0].quantidade_periodos
 
 
 def __get_turmas_01__() -> List[str]:
