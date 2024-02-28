@@ -1,126 +1,105 @@
+import random
+from random import randrange
 from typing import List
 
-from professor.function.get_professores import get_professores
-from professor.model.aula import Aula
 from professor.model.disponibilidade import Disponibilidade
 from professor.model.professor import Professor
-from turma.function.get_turmas_map import get_turmas_map
 from turma.model.grade.periodo import Periodo
 
 
 def set_organizacao(professores: List[Professor], periodos: List[Periodo], turmas_map: dict) -> None:
+    disponibilidades: List[dict] = []
     for professor in professores:
-        i = 0
-        trocou_o_professor = True
-        periodo_descricao = professor.disciplina + ' - ' + professor.nome
-        while __tem_disponibilidade__(professor.disponibilidades) and i < 5:
-            if not trocou_o_professor:
-                __reiniciar__(professor, periodos, turmas_map, periodo_descricao)
+        __add_disponibilidades__(professor, disponibilidades)
 
-            trocou_o_professor = False
-            __organizar__(professor, periodos, turmas_map, periodo_descricao)
-            __set_marcacoes_consecutivas__(professor, turmas_map)
-            i += 1
+    while len(list(filter(lambda i: not i.get('is_busy'), disponibilidades))) > 0:
+        __inicializar__(periodos, disponibilidades)
+
+        for periodo in periodos:
+            possibilidades = __get_possibilidades__(periodo, disponibilidades, turmas_map)
+            __set_alocacao__(periodo, possibilidades, turmas_map, periodos)
 
 
-def __tem_disponibilidade__(disponibilidades_input: List[Disponibilidade]) -> bool:
-    filtered = list(filter(lambda i: i.quantidade_de_periodos, disponibilidades_input))
+def __add_disponibilidades__(professor: Professor, disponibilidades: List[dict]) -> None:
+    for d in professor.disponibilidades:
+        for q in range(d.quantidade_de_periodos):
+            disponibilidades.append(__get_disponibilidade__(d, professor))
 
-    return len(filtered) > 0
+
+def __get_disponibilidade__(disponibilidade_input: Disponibilidade, professor: Professor) -> dict:
+    aula = professor.aulas[0]
+
+    return {
+        'nome': professor.nome,
+        'dia': disponibilidade_input.dia,
+        'turno': disponibilidade_input.turno,
+        'turmas_ids': list(map(lambda i: i.turma, professor.aulas)),
+        'disciplina': aula.disciplina,
+        'quantidade_maxima_periodos_consecutivos': aula.quantidade_maxima_periodos_consecutivos,
+        'is_busy': False
+    }
 
 
-def __reiniciar__(professor: Professor, periodos: List[Periodo], turmas_map: dict, periodo_descricao: str) -> None:
-    for periodo in list(filter(lambda i: i.descricao == periodo_descricao, periodos)):
+def __inicializar__(periodos: List[Periodo], disponibilidades: List[dict]) -> None:
+    for periodo in periodos:
         periodo.descricao = ''
 
-    professores = get_professores(turmas_map)
-    filtered = list(filter(lambda i: i.nome == professor.nome, professores))[0]
-    for d in filtered.disponibilidades:
-        disponibilidade = list(filter(lambda i: i.dia == d.dia and i.turno == d.turno, professor.disponibilidades))[0]
-        disponibilidade.quantidade_de_periodos = d.quantidade_de_periodos
+    random.shuffle(periodos)
 
-    turmas = get_turmas_map()
-    for key, value in turmas.items():
-        turma_map = turmas_map[key]
-        for disciplina in value.disciplinas:
-            disciplina_map = list(filter(lambda i: i.id == disciplina.id, turma_map.disciplinas))[0]
-            disciplina_map.quantidade_periodos = disciplina.quantidade_periodos
+    for disponibilidade in disponibilidades:
+        disponibilidade['is_busy'] = False
 
 
-def __organizar__(professor: Professor, periodos: List[Periodo], turmas_map: dict, periodo_descricao: str) -> None:
-    dias_disponiveis = list(map(lambda i: i.dia, professor.disponibilidades))
-    turmas = list(map(lambda i: i.turma, professor.aulas))
-    periodos_filtrados = list(filter(lambda i: i.dia in dias_disponiveis and i.turma in turmas, periodos))
-    periodos_ja_alocados = []
-    for periodo in periodos_filtrados:
-        turma = turmas_map[periodo.turma]
-        disciplina = list(filter(lambda i: i.id == professor.disciplina, turma.disciplinas))[0]
+def __get_possibilidades__(periodo: Periodo, disponibilidades: List[dict], turmas_map: dict) -> List[dict]:
+    return list(filter(lambda i: __is_match_disponibilidade__(i, periodo, turmas_map), disponibilidades))
 
-        disponibilidade = __get_disponibilidade__(professor, turma.turno, periodo.dia) \
-            if disciplina.quantidade_periodos > 0 else __get_empty_disponibilidade__()
 
-        quantidade_maxima_periodos_consecutivos = (list(filter(
-            lambda i: i.turma == periodo.turma and i.disciplina == disciplina.id, professor.aulas))[0]
-                                                   .quantidade_maxima_periodos_consecutivos)
+def __is_match_disponibilidade__(d: dict, periodo: Periodo, turmas_map: dict) -> bool:
+    turma = turmas_map.get(periodo.turma)
+    is_turma_ok = periodo.turma in d['turmas_ids']
 
-        if (disponibilidade.quantidade_de_periodos > 0 and __nao_tem_marcacoes_consecutivas_ainda__(
-                quantidade_maxima_periodos_consecutivos, periodos_filtrados, periodo.turma, periodo.dia,
-                periodo_descricao) and disciplina.quantidade_periodos > 0 and not periodo.descricao and
-                __nao_ha_periodos_simultaneos__(periodos_ja_alocados, periodo, turmas_map)):
+    return d['dia'] == periodo.dia and is_turma_ok and d['turno'] == turma.turno and not d['is_busy']
 
+
+def __set_alocacao__(periodo: Periodo, possibilidades: List[dict], turmas_map: dict, periodos: List[Periodo]) -> None:
+    size = len(possibilidades)
+    if size > 0:
+        index = randrange(size)
+        possibilidade = possibilidades[index]
+        periodo_descricao = possibilidade['disciplina'] + ' - ' + possibilidade['nome']
+        if __is_suitable__(periodo, turmas_map, periodos, periodo_descricao, possibilidade):
             periodo.descricao = periodo_descricao
-            disponibilidade.quantidade_de_periodos -= 1
-            disciplina.quantidade_periodos -= 1
-            periodos_ja_alocados.append(periodo)
+            possibilidade['is_busy'] = True
 
 
-def __get_disponibilidade__(professor: Professor, turno: str, dia: str) -> Disponibilidade:
-    disponibilidades = list(filter(lambda i: i.turno == turno and i.dia == dia, professor.disponibilidades))
+def __is_suitable__(periodo: Periodo, turmas_map: dict, periodos: List[Periodo], periodo_descricao: str,
+                    possibilidade: dict) -> bool:
 
-    return disponibilidades[0] if len(disponibilidades) > 0 else __get_empty_disponibilidade__()
+    turma_id = periodo.turma
+    disciplina = possibilidade.get('disciplina')
+    quantidade_periodos = turmas_map.get(turma_id).disciplina_map.get(disciplina).quantidade_periodos
+    periodos_preenchidos = list(filter(lambda i: i.descricao == periodo_descricao and i.turma == turma_id, periodos))
+    periodos_diarios_preenchidos = list(filter(lambda i: i.dia == periodo.dia, periodos_preenchidos))
+    quantidade_maxima_periodos_consecutivos = possibilidade.get('quantidade_maxima_periodos_consecutivos')
 
+    nao_ha_periodos_na_mesma_ordem_no_mesmo_dia = __nao_ha_periodos_na_mesma_ordem_no_mesmo_dia__(
+        periodo, periodos, periodo_descricao, turmas_map)
 
-def __get_empty_disponibilidade__() -> Disponibilidade:
-    disponibilidade = Disponibilidade()
-    disponibilidade.quantidade_de_periodos = 0
-
-    return disponibilidade
-
-
-def __nao_tem_marcacoes_consecutivas_ainda__(quantidade: int, periodos: List[Periodo], turma_id: str, dia_id: str,
-                                             periodo_descricao: str) -> bool:
-    periodos_filtrados = list(filter(
-        lambda i: i.dia == dia_id and i.turma == turma_id and i.descricao == periodo_descricao, periodos))
-
-    return len(periodos_filtrados) < quantidade
+    return (quantidade_periodos > len(periodos_preenchidos) and quantidade_maxima_periodos_consecutivos >
+            len(periodos_diarios_preenchidos) and nao_ha_periodos_na_mesma_ordem_no_mesmo_dia)
 
 
-def __nao_ha_periodos_simultaneos__(periodos_ja_alocados: List[Periodo], periodo: Periodo, turmas_map: dict) -> bool:
-    simultaneos = list(filter(lambda i: __is_simultaneos_callback__(i, periodo, turmas_map), periodos_ja_alocados))
+def __nao_ha_periodos_na_mesma_ordem_no_mesmo_dia__(periodo: Periodo, periodos: List[Periodo],
+                                                    periodo_descricao: str, turmas_map: dict) -> bool:
 
-    return len(simultaneos) == 0
+    filtered = list(filter(lambda i: __mesmo_dia_e_ordem_callback__(i, periodo, periodo_descricao, turmas_map),
+                           periodos))
 
-
-def __is_simultaneos_callback__(i: Periodo, periodo: Periodo, turmas_map: dict) -> bool:
-    is_same_turno = turmas_map[i.turma].turno == turmas_map[periodo.turma].turno
-
-    return i.dia == periodo.dia and i.ordem == periodo.ordem and is_same_turno
+    return len(filtered) == 0
 
 
-def __set_marcacoes_consecutivas__(professor: Professor, turmas_map: dict) -> None:
-    aulas_pendentes: List[Aula] = []
-    for aula in professor.aulas:
-        turma = turmas_map[aula.turma]
-        disciplina = list(filter(lambda i: i.id == aula.disciplina, turma.disciplinas))[0]
-        if disciplina.quantidade_periodos:
-            aulas_pendentes.append(aula)
+def __mesmo_dia_e_ordem_callback__(i: Periodo, periodo: Periodo, periodo_descricao: str, turmas_map: dict) -> bool:
+    is_mesmo_turno = turmas_map.get(i.turma).turno == turmas_map.get(periodo.turma).turno
 
-    turmas_pendentes = list(map(lambda i: i.turma, aulas_pendentes))
+    return i.dia == periodo.dia and i.ordem == periodo.ordem and i.descricao == periodo_descricao and is_mesmo_turno
 
-    aulas_a_reduzir_quantidade_periodos_consecutivos = list(filter(lambda i: i.turma not in turmas_pendentes,
-                                                                   professor.aulas))
-
-    for aula_a_reduzir in aulas_a_reduzir_quantidade_periodos_consecutivos:
-        aula_a_reduzir.quantidade_maxima_periodos_consecutivos -= 1
-
-    pass
