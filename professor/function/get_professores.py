@@ -3,7 +3,6 @@ from typing import List
 from professor.model.aula import Aula
 from professor.model.disponibilidade import Disponibilidade
 from professor.model.professor import Professor
-from turma.model.disciplina import Disciplina
 
 
 def get_professores(turmas_map: dict) -> List[Professor]:
@@ -37,16 +36,10 @@ def __get_aula__(turma: str, disciplina: str, turmas_map: dict) -> Aula:
     aula = Aula()
     aula.turma = turma
     aula.disciplina = disciplina
-    quantidade_periodos = __get_quantidade_periodos__(turmas_map[turma].disciplinas, disciplina)
+    quantidade_periodos = turmas_map.get(turma).disciplina_map.get(disciplina).quantidade_periodos
     aula.quantidade_maxima_periodos_consecutivos = int(quantidade_periodos / 2) + 1
 
     return aula
-
-
-def __get_quantidade_periodos__(disciplinas: List[Disciplina], disciplina: str) -> int:
-    filtered = list(filter(lambda i: i.id == disciplina, disciplinas))
-
-    return filtered[0].quantidade_periodos
 
 
 def __get_turmas_01__() -> List[str]:
