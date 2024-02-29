@@ -44,10 +44,13 @@ def __get_dias_da_semana__(dia_da_semana: GradeDia, periodos: List[Periodo]) -> 
     }
 
 
-def __get_grade_turmas__(grade_turma: GradeTurma, periodos: List[Periodo]) -> dict:
+def __get_grade_turmas__(grade_turma: GradeTurma, periodos_input: List[Periodo]) -> dict:
+    periodos_filtered = list(filter(lambda i: i.turma == grade_turma.id, periodos_input))
+    periodos = sorted(periodos_filtered, key=lambda i: i.ordem)
+
     return {
         'id': grade_turma.id,
-        'periodos': list(map(__get_periodo__, filter(lambda i: i.turma == grade_turma.id, periodos)))
+        'periodos': list(map(__get_periodo__, periodos))
     }
 
 
