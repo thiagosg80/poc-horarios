@@ -12,7 +12,10 @@ def get_professores(turmas_map: dict) -> List[Professor]:
         # __get_professor__('patricia', 'mat', __get_turmas_03__(), turmas_map, __get_disponibilidades_03__()),
         # __get_professor__('cristian', 'geo', __get_turmas_04__(), turmas_map, __get_disponibilidades_04__()),
         # __get_professor__('jeferson', 'ingl', __get_turmas_04__(), turmas_map, __get_disponibilidades_05__()),
-        __get_professor__('robson', 'ef', __get_turmas_04__(), turmas_map, __get_disponibilidades_06__())
+        __get_professor__('robson', 'ef', __get_turmas_04__(), turmas_map, __get_disponibilidades_06__()),
+        # __get_professor__('edson', 'hist', __get_turmas_04__(), turmas_map, __get_disponibilidades_07()),
+        # __get_professor__('crissiane', 'ic', __get_turmas_04__(), turmas_map, __get_disponibilidades_08()),
+        # __get_professor__('maristela', 'cie', __get_turmas_04__(), turmas_map, __get_disponibilidades_09())
     ]
 
 
@@ -123,6 +126,33 @@ def __get_disponibilidades_06__() -> List[Disponibilidade]:
         __get_disponibilidade__('qua', 'tarde', 2),
         __get_disponibilidade__('qui', 'tarde', 1),
         __get_disponibilidade__('sex', 'tarde', 5)
+    ]
+
+
+def __get_disponibilidades_07() -> List[Disponibilidade]:
+    return [
+        __get_disponibilidade__('ter', 'manha', 4),
+        __get_disponibilidade__('qui', 'manha', 4),
+        __get_disponibilidade__('ter', 'tarde', 4),
+        __get_disponibilidade__('qui', 'tarde', 4)
+    ]
+
+
+def __get_disponibilidades_08() -> List[Disponibilidade]:
+    return [
+        __get_disponibilidade__('ter', 'manha', 3),
+        __get_disponibilidade__('sex', 'manha', 5),
+        __get_disponibilidade__('ter', 'tarde', 3),
+        __get_disponibilidade__('sex', 'tarde', 5)
+    ]
+
+
+def __get_disponibilidades_09() -> List[Disponibilidade]:
+    return [
+        __get_disponibilidade__('ter', 'manha', 3),
+        __get_disponibilidade__('qua', 'manha', 5),
+        __get_disponibilidade__('ter', 'tarde', 4),
+        __get_disponibilidade__('qua', 'tarde', 4)
     ]
 
 

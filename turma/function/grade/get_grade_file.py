@@ -1,11 +1,9 @@
-from flask import Response, send_file, render_template
+from flask import Response, send_file
+
+from turma.function.write_file import write_file
 
 
-def get_grade_file(input: dict) -> Response:
-    file_name = 'grade.html'
-    resource_name = 'resource/grade.html'
-    file = open(resource_name, 'w')
-    file.write(render_template(file_name, grade_input=input))
-    file.close()
+def get_grade_file(input: dict, resource_name: str) -> Response:
+    write_file(input, resource_name)
 
     return send_file(resource_name)
