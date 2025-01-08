@@ -4,7 +4,6 @@ from turma.model.grade.periodo import Periodo
 from turma.model.grade.turma import GradeTurma
 from turma.model.grade.dia import GradeDia
 from turma.model.grade.turno import GradeTurno
-from turma.model.turma import Turma
 
 
 def get_turnos_grade(turmas_map: dict, dias_da_semana: List[str], periodos: List[Periodo]) -> List[GradeTurno]:
@@ -40,5 +39,5 @@ def __get_grade_dia__(dia_da_semana: str, turmas_map: dict, periodos: List[Perio
 def __set_turma__(turma_id: str, grade_dia: GradeDia, periodos: List[Periodo]) -> None:
     grade_turma = GradeTurma()
     grade_turma.id = turma_id
-    grade_turma.periodos = periodos
+    grade_turma.periodos = [x for x in periodos if x.turma == turma_id]
     grade_dia.grade_turmas.append(grade_turma)

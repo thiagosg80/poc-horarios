@@ -2,6 +2,7 @@ from typing import List
 
 from flask import Response
 
+from function.get_dias_da_semana import get_dias_da_semana
 from professor.function.get_professores import get_professores
 from turma.function.get_periodos import get_periodos
 from turma.function.get_turmas_map import get_turmas_map
@@ -16,11 +17,11 @@ from turma.model.grade.turno import GradeTurno
 
 def perform_organizacao() -> Response:
     turmas_map = get_turmas_map()
-    dias_da_semana = ['seg', 'ter', 'qua', 'qui', 'sex']
+    dias_da_semana = get_dias_da_semana()
     periodos = get_periodos(list(map(lambda key: key, turmas_map)), dias_da_semana)
     turnos_grade = get_turnos_grade(turmas_map, dias_da_semana, periodos)
     professores = get_professores(turmas_map)
-    set_organizacao(professores, periodos, turmas_map)
+    set_organizacao(professores, turmas_map, turnos_grade)
 
     grade = {
         'turnos': list(map(lambda i: __get_turnos__(i, periodos), turnos_grade))
