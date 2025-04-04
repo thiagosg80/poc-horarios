@@ -1,63 +1,59 @@
-from typing import List
-
 from flask import Response
-
-from function.get_dias_da_semana import get_dias_da_semana
-from professor.function.get_professores import get_professores
-from turma.function.get_periodos import get_periodos
-from turma.function.get_turmas_map import get_turmas_map
-from turma.function.get_turnos_grade import get_turnos_grade
+from OrganizadorHorarios import OrganizadorHorarios
 from turma.function.grade.get_grade_file import get_grade_file
-from function.set_organizacao import set_organizacao
-from turma.model.grade.periodo import Periodo
-from turma.model.grade.turma import GradeTurma
-from turma.model.grade.dia import GradeDia
-from turma.model.grade.turno import GradeTurno
 
 
 def perform_organizacao() -> Response:
-    turmas_map = get_turmas_map()
-    dias_da_semana = get_dias_da_semana()
-    periodos = get_periodos(list(map(lambda key: key, turmas_map)), dias_da_semana)
-    turnos_grade = get_turnos_grade(turmas_map, dias_da_semana, periodos)
-    professores = get_professores(turmas_map)
-    set_organizacao(professores, turmas_map, turnos_grade)
+    organizador = OrganizadorHorarios()
+    dias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta']
+    periodos = 5
+    organizador.definir_horarios(dias, periodos)
 
-    grade = {
-        'turnos': list(map(lambda i: __get_turnos__(i, periodos), turnos_grade))
-    }
+    professores = [
+        (1, 'andreia p', {'Segunda': 5, 'Quarta': 5, 'Sexta': 5}),
+        (2, 'josiane', {'Terça': 2, 'Quarta': 2, 'Quinta': 1}),
+        (3, 'maristela', {'Terça': 3, 'Quarta': 5}),
+        (4, 'edson', {'Terça': 4, 'Quinta': 4}),
+        (5, 'cristian', {'Segunda': 4, 'Quarta': 4}),
+        (6, 'jeferson', {'Segunda': 3, 'Quinta': 5}),
+        (7, 'robson', {'Segunda': 4, 'Quarta': 1, 'Sexta': 3}),
+        (8, 'crissiane', {'Terça': 3, 'Sexta': 5})
+    ]
 
-    return get_grade_file(grade)
+    for id_prof, nome, disponibilidade in professores:
+        organizador.adicionar_professor(id_prof, nome, disponibilidade)
 
+    disciplinas = [
+        (1, "Matemática"),
+        (2, "Português"),
+        (3, "Ciências"),
+        (4, "História"),
+        (5, "Geografia"),
+        (6, "Inglês"),
+        (7, "Educação Física"),
+        (8, 'Iniciação Científica')
+    ]
 
-def __get_turnos__(turno: GradeTurno, periodos: List[Periodo]) -> dict:
-    return {
-        'id': turno.id,
-        'dias_da_semana': list(map(lambda i: __get_dias_da_semana__(i, periodos), turno.dias_da_semana))
-    }
+    for id_disc, nome in disciplinas:
+        organizador.adicionar_disciplina(id_disc, nome)
 
+    turmas = [
+        (1, '161',
+         {1: 5, 2: 5, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2, 8: 2},
+         {1: 2, 2: 1, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8}
+        ),
+        (2, '171',
+         {2: 5, 3: 2, 4: 2, 5: 2, 6: 2, 7: 2, 8: 2},
+         {2: 1, 3: 3, 4: 4, 5: 5, 6: 6, 7: 7, 8: 8}
+         )
+    ]
 
-def __get_dias_da_semana__(dia_da_semana: GradeDia, periodos: List[Periodo]) -> dict:
-    periodos_by_dia = list(filter(lambda i: i.dia == dia_da_semana.id, periodos))
+    for id_turma, nome, disc_carga, prof_disc in turmas:
+        organizador.adicionar_turma(id_turma, nome, disc_carga, prof_disc)
 
-    return {
-        'id': dia_da_semana.id,
-        'turmas': list(map(lambda i: __get_grade_turmas__(i, periodos_by_dia), dia_da_semana.grade_turmas))
-    }
+    organizador.gerar_horarios()
 
+    nome_arquivo = "horarios_escolares.html"
+    organizador.exportar_para_html(nome_arquivo)
 
-def __get_grade_turmas__(grade_turma: GradeTurma, periodos_input: List[Periodo]) -> dict:
-    periodos_filtered = list(filter(lambda i: i.turma == grade_turma.id, periodos_input))
-    periodos = sorted(periodos_filtered, key=lambda i: i.ordem)
-
-    return {
-        'id': grade_turma.id,
-        'periodos': list(map(__get_periodo__, periodos))
-    }
-
-
-def __get_periodo__(periodo: Periodo) -> dict:
-    return {
-        'ordem': periodo.ordem,
-        'descricao': periodo.descricao
-    }
+    return get_grade_file({})

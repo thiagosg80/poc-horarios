@@ -20,36 +20,57 @@ def get_combined_grades(grades_by_professor, turnos_as_string, turmas_map) -> di
             grades = grade_professor['grades'][turno]
             grades_by_turno.append({'professor_nome': grade_professor['professor_nome'], 'grades': grades})
 
-        combined = grades_by_turno[0]['grades']
-        grades_by_turno.pop(0)
-
         for grade_by_turno in grades_by_turno:
-            print('Acrescentando grade de ' + grade_by_turno['professor_nome'] + ' (turno ' + turno + ').')
-            current_grade = grade_by_turno['grades']
-            indexes_groups = __get_indexes_groups(combined, current_grade)
-            combined_temp = []
+            grade_by_turno['grades'] = grade_by_turno['grades'][:4]
+            random.shuffle(grade_by_turno['grades'])
 
-            for indexes in indexes_groups:
-                to_combine: List[dict] = []
-                for key, value in enumerate(indexes):
-                    partial = combined[value] if key == 0 else current_grade[value]
-                    to_combine.append(partial)
-
-                result = __get_result(to_combine, dias_da_semana, turmas_by_turno, periodos_ordens)
-
-                if result:
-                    combined_temp.append(result)
-
-            combined = combined_temp
-            print(f'Total de grades (turno {turno}): {len(combined)}.')
-
-        combined_grades[turno] = combined
+        combined_grades[turno] = __produto_cartesiano_recursivo([x['grades'] for x in grades_by_turno], dias_da_semana,
+                                                                turmas_by_turno, periodos_ordens, [])
 
     return combined_grades
 
 
 def __get_turmas_by_turno(turno, turmas_map) -> List[str]:
     return list([x for x in turmas_map if turmas_map.get(x).turno == turno])
+
+
+def __produto_cartesiano_recursivo(grades_by_professores: List[dict], dias_da_semana, turmas_by_turno,
+                                   periodos_ordens, current) -> List:
+    if not grades_by_professores:
+        return __perform_combin(current, dias_da_semana, turmas_by_turno, periodos_ordens)
+
+    performed = []
+    for grade in grades_by_professores[0]:
+        current.append(grade)
+
+        performed = __produto_cartesiano_recursivo(grades_by_professores[1:], dias_da_semana, turmas_by_turno,
+                                                   periodos_ordens, current)
+        if performed:
+            break
+
+    return performed
+
+
+def __perform_combin(input, dias_da_semana, turmas_by_turno, periodos_ordens) -> List:
+    combined = input[0]
+    input.pop(0)
+
+    is_broken: bool = False
+    for current_grade in input:
+        combined_temp = []
+        to_combine: List[dict] = [combined, current_grade]
+        result = __get_result(to_combine, dias_da_semana, turmas_by_turno, periodos_ordens)
+
+        is_broken = True if not result else False
+        if is_broken:
+            break
+
+        if not is_broken:
+            combined_temp.append(result)
+
+        combined = combined_temp
+
+    return combined if not is_broken else []
 
 
 def __get_indexes_groups(combined, current_grade) -> List[tuple]:
