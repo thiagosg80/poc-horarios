@@ -5,9 +5,9 @@ from function.get_dias_da_semana import get_dias_da_semana
 from turma.function.get_indexes_groups import get_indexes_groups
 
 
-def get_dias_by_sectors(sectors: List[dict], turmas_do_professor, disponibilidades_by_turno) -> List[dict]:
+def get_dias_by_sectors(sectors: List[dict], turmas_do_professor, disponibilidades_by_turno, disciplina) -> dict:
     dias_da_semana: List[str] = get_dias_da_semana()
-    dias_by_sectors: List[dict] = []
+    dias_by_sectors: dict = {}
 
     for dia_da_semana in dias_da_semana:
         container_dias: List[dict] = []
@@ -24,14 +24,15 @@ def get_dias_by_sectors(sectors: List[dict], turmas_do_professor, disponibilidad
             quantidade_periodos_disponiveis = disponibilidade_by_dia.quantidade_de_periodos
 
             dia_by_sectors: List[dict] = __get_dia_by_sectors(container_dias, indexes_groups,
-                                                              quantidade_periodos_disponiveis)
+                                                              quantidade_periodos_disponiveis, disciplina)
 
-            dias_by_sectors.append({'dia': dia_da_semana, 'possibilidades': dia_by_sectors})
+            dias_by_sectors[dia_da_semana] = dia_by_sectors
+            print(f'Quantidade de grades de {dia_da_semana}: {len(dia_by_sectors)}.')
 
     return dias_by_sectors
 
 
-def __get_dia_by_sectors(container_dias, indexes_groups, quantidade_periodos_disponiveis) -> List:
+def __get_dia_by_sectors(container_dias, indexes_groups, quantidade_periodos_disponiveis, disciplina) -> List:
     dias = []
     for indexes in indexes_groups:
         possibilities: dict = {}
@@ -45,7 +46,7 @@ def __get_dia_by_sectors(container_dias, indexes_groups, quantidade_periodos_dis
                 for cell in sector:
                     cells.append(cell)
 
-                quantidade_periodos_alocados = len([x for x in sector if x['allocated'] != ''])
+                quantidade_periodos_alocados = {disciplina: len([x for x in sector if x['allocated'] != ''])}
 
                 possibilities[container['turma']] = {
                     'cells': sector,
