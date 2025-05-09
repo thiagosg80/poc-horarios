@@ -5,9 +5,9 @@ from function.get_dias_da_semana import get_dias_da_semana
 from turma.function.get_indexes_groups import get_indexes_groups
 
 
-def get_dias_by_sectors(sectors: List[dict], turmas_do_professor, disponibilidades_by_turno) -> List[dict]:
+def get_dias_by_sectors(sectors: List[dict], turmas_do_professor, disponibilidades_by_turno) -> dict:
     dias_da_semana: List[str] = get_dias_da_semana()
-    dias_by_sectors: List[dict] = []
+    dias_by_sectors: dict = {}
 
     for dia_da_semana in dias_da_semana:
         container_dias: List[dict] = []
@@ -26,7 +26,8 @@ def get_dias_by_sectors(sectors: List[dict], turmas_do_professor, disponibilidad
             dia_by_sectors: List[dict] = __get_dia_by_sectors(container_dias, indexes_groups,
                                                               quantidade_periodos_disponiveis)
 
-            dias_by_sectors.append({'dia': dia_da_semana, 'possibilidades': dia_by_sectors})
+            dias_by_sectors[dia_da_semana] = dia_by_sectors
+            print(f'Quantidade de grades de {dia_da_semana}: {len(dia_by_sectors)}.')
 
     return dias_by_sectors
 

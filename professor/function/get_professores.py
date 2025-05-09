@@ -7,7 +7,7 @@ from professor.model.professor import Professor
 
 def get_professores(turmas_map: dict) -> List[Professor]:
     return [
-        # __get_professor__('andreia p', 'port', __get_turmas_01__(), turmas_map, __get_disponibilidades_01__()),
+        __get_professor__('andreia p', 'port', __get_turmas_01__(), turmas_map, __get_disponibilidades_01__()),
         # __get_professor__('josiane', 'mat', __get_turmas_02__(), turmas_map, __get_disponibilidades_02__()),
         # __get_professor__('patricia', 'mat', __get_turmas_03__(), turmas_map, __get_disponibilidades_03__()),
         # __get_professor__('cristian', 'geo', __get_turmas_04__(), turmas_map, __get_disponibilidades_04__()),
