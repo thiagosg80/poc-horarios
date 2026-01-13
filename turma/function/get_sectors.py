@@ -65,15 +65,5 @@ def __set_sector(sector, periodos_to_fill, index, dia, turma, professor, discipl
 def __is_ok(allocated_periodos_ordens: List[int]) -> bool:
     allocated_count = len(allocated_periodos_ordens)
 
-    return (allocated_count == 1 or allocated_count == 2 and __is_continuous_pair(allocated_periodos_ordens) or
+    return (allocated_count == 1 or allocated_count == 2 or
             allocated_count > 2 and len([x for x in allocated_periodos_ordens if x in [1, 3, 5]]) != 3)
-
-
-def __is_continuous_pair(allocated_periodos_ordens) -> bool:
-    return (__is_continuous(allocated_periodos_ordens, [1, 2])
-            or __is_continuous(allocated_periodos_ordens, [2, 3])
-            or __is_continuous(allocated_periodos_ordens, [3, 4])
-            or __is_continuous(allocated_periodos_ordens, [4, 5]))
-
-def __is_continuous(allocated_periodos_ordens, possibility) -> bool:
-    return len([x for x in allocated_periodos_ordens if x in possibility]) == 2
