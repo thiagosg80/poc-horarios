@@ -12,7 +12,7 @@ def get_professores(turmas_map: dict) -> List[Professor]:
         __get_professor('patricia', 'mat', __get_turmas_03(), turmas_map, __get_disponibilidades_03(), 1),
         __get_professor('cristian', 'geo', __get_turmas_04(), turmas_map, __get_disponibilidades_04(), 1),
         __get_professor('jeferson', 'ingl', __get_turmas_04(), turmas_map, __get_disponibilidades_05(), 1),
-        __get_professor('robson', 'ef', __get_turmas_04(), turmas_map, __get_disponibilidades_06(), 2),
+        __get_professor('robson', 'ef', __get_turmas_04(), turmas_map, __get_disponibilidades_06(), 1),
         __get_professor('edson', 'hist', __get_turmas_04(), turmas_map, __get_disponibilidades_07(), 1),
         __get_professor('crissiane', 'ic', __get_turmas_04(), turmas_map, __get_disponibilidades_08(), 1),
         __get_professor('maristela', 'cie', __get_turmas_04(), turmas_map, __get_disponibilidades_09(), 1),
