@@ -1,0 +1,2 @@
+class EmptyFactorException(Exception):
+    pass
