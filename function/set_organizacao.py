@@ -1,14 +1,16 @@
 import time
 from typing import List
 
+
 from function.get_dias_da_semana import get_dias_da_semana
+from function.get_disponibilidade_map import get_disponibilidade_map
+from function.get_quantidades_periodos_map import get_quantidades_periodos_map
 from function.to_grade import to_grade
 from model.sector import Sector
 from professor.model.disponibilidade import Disponibilidade
 from professor.model.professor import Professor
 from turma.function.fit import fit
 from turma.function.get_combine_grades import get_combined_grades
-from turma.function.get_cell import get_cell
 from turma.function.get_dias_by_sectors import get_dias_by_sectors
 from turma.function.get_grades_by_dias import get_grades_by_dias
 from turma.function.get_periodos import get_periodos
@@ -63,12 +65,17 @@ def __add_grade_by_turno(grades_map, professor, turmas_do_professor, turno, turm
                                                                    professor.disponibilidades))
 
     disponibilidade_dias_da_semana = list(map(lambda i: i.dia, disponibilidades_by_turno))
+    quantidades_periodos_map: dict = get_quantidades_periodos_map(professor.aulas)
 
-    sectors: List[Sector] = get_sectors(professor, turmas_by_turno, disponibilidade_dias_da_semana, turno,
-                                        periodos_ordem)
+    sectors: List[Sector] = get_sectors(professor, turmas_by_turno, disponibilidade_dias_da_semana, periodos_ordem,
+                                        quantidades_periodos_map, turmas_map)
 
-    dias_by_sectors: List[dict] = get_dias_by_sectors(sectors, turmas_by_turno, disponibilidades_by_turno)
-    grades_by_dias = get_grades_by_dias(dias_by_sectors, turmas_by_turno, turmas_map, professor.aulas)
+    disponibilidade_map: dict = get_disponibilidade_map(professor.disponibilidades, turno)
+
+    dias_by_sectors: dict = get_dias_by_sectors(sectors, turmas_by_turno, disponibilidade_dias_da_semana,
+                                                      quantidades_periodos_map, disponibilidade_map)
+
+    grades_by_dias = get_grades_by_dias(dias_by_sectors, turmas_map, professor.aulas)
     grades_map[turno] = grades_by_dias
     print(f'Quantidade de grades de {professor.nome} (turno {turno}): {len(grades_by_dias)}.')
 

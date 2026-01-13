@@ -12,6 +12,7 @@ def get_turmas_map() -> dict:
         '172': __get_turma('tarde', __get_disciplina_map_default()),
         '181': __get_turma('manha', __get_disciplina_map_default()),
         '182': __get_turma('tarde', __get_disciplina_map_default()),
+        '183': __get_turma('tarde', __get_disciplina_map_default()),
         '191': __get_turma('manha', __get_disciplina_map_default()),
         '192': __get_turma('tarde', __get_disciplina_map_default())
     }
