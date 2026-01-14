@@ -7,35 +7,41 @@ from professor.model.professor import Professor
 
 def get_professores(turmas_map: dict) -> List[Professor]:
     return [
-        # __get_professor__('andreia p', 'port', __get_turmas_01__(), turmas_map, __get_disponibilidades_01__()),
-        # __get_professor__('josiane', 'mat', __get_turmas_02__(), turmas_map, __get_disponibilidades_02__()),
-        # __get_professor__('patricia', 'mat', __get_turmas_03__(), turmas_map, __get_disponibilidades_03__()),
-        # __get_professor__('cristian', 'geo', __get_turmas_04__(), turmas_map, __get_disponibilidades_04__()),
-        # __get_professor__('jeferson', 'ingl', __get_turmas_04__(), turmas_map, __get_disponibilidades_05__()),
-        __get_professor__('robson', 'ef', __get_turmas_04__(), turmas_map, __get_disponibilidades_06__()),
-        # __get_professor__('edson', 'hist', __get_turmas_04__(), turmas_map, __get_disponibilidades_07()),
-        # __get_professor__('crissiane', 'ic', __get_turmas_04__(), turmas_map, __get_disponibilidades_08()),
-        # __get_professor__('maristela', 'cie', __get_turmas_04__(), turmas_map, __get_disponibilidades_09())
+        # __get_professor('andreia p', 'port', __get_turmas_01(), turmas_map, __get_disponibilidades_01()),
+        # __get_professor('josiane', 'mat', __get_turmas_02(), turmas_map, __get_disponibilidades_02()),
+        # __get_professor('patricia', 'mat', __get_turmas_03(), turmas_map, __get_disponibilidades_03()),
+        # __get_professor('cristian', 'geo', __get_turmas_04(), turmas_map, __get_disponibilidades_04()),
+        # __get_professor('jeferson', 'ingl', __get_turmas_04(), turmas_map, __get_disponibilidades_05()),
+        # __get_professor('robson', 'ef', __get_turmas_04(), turmas_map, __get_disponibilidades_06()),
+        # __get_professor('edson', 'hist', __get_turmas_04(), turmas_map, __get_disponibilidades_07()),
+        # __get_professor('crissiane', 'ic', __get_turmas_04(), turmas_map, __get_disponibilidades_08()),
+        # __get_professor('maristela', 'cie', __get_turmas_04(), turmas_map, __get_disponibilidades_09()),
+        # __get_professor('elaine', 'art', __get_turmas_04(), turmas_map, __get_disponibilidades_10()),
+        # __get_professor('lilian', 'er', __get_turmas_05(), turmas_map, __get_disponibilidades_11()),
+        # __get_professor('andrelise', 'er', __get_turmas_06(), turmas_map, __get_disponibilidades_12()),
+        # __get_professor('cristian', 'er', __get_turmas_07(), turmas_map, __get_disponibilidades_13()),
+        # __get_professor('lilian mat', 'mat', __get_turmas_08(), turmas_map, __get_disponibilidades_14()),
+        __get_professor('andreia s', 'port', __get_turmas_09(), turmas_map, __get_disponibilidades_15())
     ]
 
 
-def __get_professor__(nome: str, disciplina: str, turmas: List[str], turmas_map: dict,
-                      disponibilidades: List[Disponibilidade]) -> Professor:
+def __get_professor(nome: str, disciplina: str, turmas: List[str], turmas_map: dict,
+                    disponibilidades: List[Disponibilidade]) -> Professor:
 
     professor = Professor()
     professor.nome = nome
     professor.disciplina = disciplina
-    professor.aulas = __get_aulas__(turmas, disciplina, turmas_map)
+    professor.aulas = __get_aulas(turmas, disciplina, turmas_map)
     professor.disponibilidades = disponibilidades
 
     return professor
 
 
-def __get_aulas__(turmas: List[str], disciplina: str, turmas_map: dict) -> List[Aula]:
-    return list(map(lambda i: __get_aula__(i, disciplina, turmas_map), turmas))
+def __get_aulas(turmas: List[str], disciplina: str, turmas_map: dict) -> List[Aula]:
+    return list(map(lambda i: __get_aula(i, disciplina, turmas_map), turmas))
 
 
-def __get_aula__(turma: str, disciplina: str, turmas_map: dict) -> Aula:
+def __get_aula(turma: str, disciplina: str, turmas_map: dict) -> Aula:
     aula = Aula()
     aula.turma = turma
     aula.disciplina = disciplina
@@ -45,118 +51,195 @@ def __get_aula__(turma: str, disciplina: str, turmas_map: dict) -> Aula:
     return aula
 
 
-def __get_turmas_01__() -> List[str]:
+def __get_turmas_01() -> List[str]:
     return [
         '161', '162', '171', '172', '181'
     ]
 
 
-def __get_turmas_02__() -> List[str]:
+def __get_turmas_02() -> List[str]:
     return [
         '161', '162'
     ]
 
 
-def __get_turmas_03__() -> List[str]:
+def __get_turmas_03() -> List[str]:
     return [
         '172', '181', '182'
     ]
 
 
-def __get_turmas_04__() -> List[str]:
+def __get_turmas_04() -> List[str]:
     return [
         '161', '162', '171', '172', '181', '182', '191', '192'
     ]
 
 
-def __get_disponibilidades_01__() -> List[Disponibilidade]:
+def __get_turmas_05() -> List[str]:
     return [
-        __get_disponibilidade__('seg', 'manha', 5),
-        __get_disponibilidade__('qua', 'manha', 5),
-        __get_disponibilidade__('sex', 'manha', 5),
-        __get_disponibilidade__('seg', 'tarde', 4),
-        __get_disponibilidade__('qua', 'tarde', 1),
-        __get_disponibilidade__('sex', 'tarde', 5)
+        '162', '172'
     ]
 
 
-def __get_disponibilidades_02__() -> List[Disponibilidade]:
+def __get_turmas_06() -> List[str]:
     return [
-        __get_disponibilidade__('ter', 'manha', 2),
-        __get_disponibilidade__('qua', 'manha', 2),
-        __get_disponibilidade__('qui', 'manha', 1),
-        __get_disponibilidade__('ter', 'tarde', 2),
-        __get_disponibilidade__('qua', 'tarde', 2),
-        __get_disponibilidade__('qui', 'tarde', 1)
+        '182', '192'
     ]
 
 
-def __get_disponibilidades_03__() -> List[Disponibilidade]:
+def __get_turmas_07() -> List[str]:
     return [
-        __get_disponibilidade__('seg', 'manha', 2),
-        __get_disponibilidade__('qua', 'manha', 3),
-        __get_disponibilidade__('seg', 'tarde', 5),
-        __get_disponibilidade__('qua', 'tarde', 5)
+        '161', '171', '181', '191'
     ]
 
 
-def __get_disponibilidades_04__() -> List[Disponibilidade]:
+def __get_turmas_08() -> List[str]:
     return [
-        __get_disponibilidade__('seg', 'manha', 4),
-        __get_disponibilidade__('qua', 'manha', 4),
-        __get_disponibilidade__('seg', 'tarde', 3),
-        __get_disponibilidade__('qua', 'tarde', 5)
+        '171', '191', '192'
     ]
 
 
-def __get_disponibilidades_05__() -> List[Disponibilidade]:
+def __get_turmas_09() -> List[str]:
     return [
-        __get_disponibilidade__('seg', 'manha', 3),
-        __get_disponibilidade__('qui', 'manha', 5),
-        __get_disponibilidade__('seg', 'tarde', 3),
-        __get_disponibilidade__('qui', 'tarde', 5)
+        '182', '191', '192'
     ]
 
 
-def __get_disponibilidades_06__() -> List[Disponibilidade]:
+def __get_disponibilidades_01() -> List[Disponibilidade]:
     return [
-        __get_disponibilidade__('seg', 'manha', 4),
-        __get_disponibilidade__('qua', 'manha', 1),
-        __get_disponibilidade__('sex', 'manha', 3),
-        __get_disponibilidade__('qua', 'tarde', 2),
-        __get_disponibilidade__('qui', 'tarde', 1),
-        __get_disponibilidade__('sex', 'tarde', 5)
+        __get_disponibilidade('seg', 'manha', 5),
+        __get_disponibilidade('qua', 'manha', 5),
+        __get_disponibilidade('sex', 'manha', 5),
+        __get_disponibilidade('seg', 'tarde', 4),
+        __get_disponibilidade('qua', 'tarde', 1),
+        __get_disponibilidade('sex', 'tarde', 5)
+    ]
+
+
+def __get_disponibilidades_02() -> List[Disponibilidade]:
+    return [
+        __get_disponibilidade('ter', 'manha', 2),
+        __get_disponibilidade('qua', 'manha', 2),
+        __get_disponibilidade('qui', 'manha', 1),
+        __get_disponibilidade('ter', 'tarde', 2),
+        __get_disponibilidade('qua', 'tarde', 2),
+        __get_disponibilidade('qui', 'tarde', 1)
+    ]
+
+
+def __get_disponibilidades_03() -> List[Disponibilidade]:
+    return [
+        __get_disponibilidade('seg', 'manha', 2),
+        __get_disponibilidade('qua', 'manha', 3),
+        __get_disponibilidade('seg', 'tarde', 5),
+        __get_disponibilidade('qua', 'tarde', 5)
+    ]
+
+
+def __get_disponibilidades_04() -> List[Disponibilidade]:
+    return [
+        __get_disponibilidade('seg', 'manha', 4),
+        __get_disponibilidade('qua', 'manha', 4),
+        __get_disponibilidade('seg', 'tarde', 3),
+        __get_disponibilidade('qua', 'tarde', 5)
+    ]
+
+
+def __get_disponibilidades_05() -> List[Disponibilidade]:
+    return [
+        __get_disponibilidade('seg', 'manha', 3),
+        __get_disponibilidade('qui', 'manha', 5),
+        __get_disponibilidade('seg', 'tarde', 3),
+        __get_disponibilidade('qui', 'tarde', 5)
+    ]
+
+
+def __get_disponibilidades_06() -> List[Disponibilidade]:
+    return [
+        __get_disponibilidade('seg', 'manha', 4),
+        __get_disponibilidade('qua', 'manha', 1),
+        __get_disponibilidade('sex', 'manha', 3),
+        __get_disponibilidade('qua', 'tarde', 2),
+        __get_disponibilidade('qui', 'tarde', 1),
+        __get_disponibilidade('sex', 'tarde', 5)
     ]
 
 
 def __get_disponibilidades_07() -> List[Disponibilidade]:
     return [
-        __get_disponibilidade__('ter', 'manha', 4),
-        __get_disponibilidade__('qui', 'manha', 4),
-        __get_disponibilidade__('ter', 'tarde', 4),
-        __get_disponibilidade__('qui', 'tarde', 4)
+        __get_disponibilidade('ter', 'manha', 4),
+        __get_disponibilidade('qui', 'manha', 4),
+        __get_disponibilidade('ter', 'tarde', 4),
+        __get_disponibilidade('qui', 'tarde', 4)
     ]
 
 
 def __get_disponibilidades_08() -> List[Disponibilidade]:
     return [
-        __get_disponibilidade__('ter', 'manha', 3),
-        __get_disponibilidade__('sex', 'manha', 5),
-        __get_disponibilidade__('ter', 'tarde', 3),
-        __get_disponibilidade__('sex', 'tarde', 5)
+        __get_disponibilidade('ter', 'manha', 3),
+        __get_disponibilidade('sex', 'manha', 5),
+        __get_disponibilidade('ter', 'tarde', 3),
+        __get_disponibilidade('sex', 'tarde', 5)
     ]
 
 
 def __get_disponibilidades_09() -> List[Disponibilidade]:
     return [
-        __get_disponibilidade__('ter', 'manha', 3),
-        __get_disponibilidade__('qua', 'manha', 5),
-        __get_disponibilidade__('ter', 'tarde', 4),
-        __get_disponibilidade__('qua', 'tarde', 4)
+        __get_disponibilidade('ter', 'manha', 3),
+        __get_disponibilidade('qua', 'manha', 5),
+        __get_disponibilidade('ter', 'tarde', 4),
+        __get_disponibilidade('qua', 'tarde', 4)
     ]
 
 
-def __get_disponibilidade__(dia_da_semana: str, turno: str, quantidade_de_periodos: int) -> Disponibilidade:
+def __get_disponibilidades_10() -> List[Disponibilidade]:
+    return [
+        __get_disponibilidade('ter', 'manha', 3),
+        __get_disponibilidade('qui', 'manha', 5),
+        __get_disponibilidade('ter', 'tarde', 3),
+        __get_disponibilidade('qui', 'tarde', 5)
+    ]
+
+
+def __get_disponibilidades_11() -> List[Disponibilidade]:
+    return [
+        __get_disponibilidade('qui', 'tarde', 2)
+    ]
+
+
+def __get_disponibilidades_12() -> List[Disponibilidade]:
+    return [
+        __get_disponibilidade('qua', 'tarde', 1),
+        __get_disponibilidade('qui', 'tarde', 1)
+    ]
+
+
+def __get_disponibilidades_13() -> List[Disponibilidade]:
+    return [
+        __get_disponibilidade('seg', 'manha', 1),
+        __get_disponibilidade('sex', 'manha', 3)
+    ]
+
+
+def __get_disponibilidades_14() -> List[Disponibilidade]:
+    return [
+        __get_disponibilidade('ter', 'manha', 5),
+        __get_disponibilidade('qui', 'manha', 5),
+        __get_disponibilidade('ter', 'tarde', 4),
+        __get_disponibilidade('qui', 'tarde', 1)
+    ]
+
+
+def __get_disponibilidades_15() -> List[Disponibilidade]:
+    return [
+        __get_disponibilidade('seg', 'manha', 1),
+        __get_disponibilidade('sex', 'manha', 4),
+        __get_disponibilidade('seg', 'tarde', 5),
+        __get_disponibilidade('sex', 'tarde', 5)
+    ]
+
+
+def __get_disponibilidade(dia_da_semana: str, turno: str, quantidade_de_periodos: int) -> Disponibilidade:
     disponibilidade = Disponibilidade()
     disponibilidade.dia = dia_da_semana
     disponibilidade.turno = turno
