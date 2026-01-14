@@ -52,7 +52,7 @@ def __get_dia_by_sectors(container_dias, indexes_groups, quantidade_periodos_dis
                     'quantidade_periodos_alocados': quantidade_periodos_alocados
                 }
 
-        if len(possibilities) == len(indexes) and __has_no_double_single(possibilities):
+        if len(possibilities) == len(indexes):
             dias.append(possibilities)
 
     return dias
@@ -93,9 +93,3 @@ def __get_future_cells_quantity(cells, sector) -> int:
     quantidade_de_cells_a_lancar = len([x for x in sector if x['allocated'] != ''])
 
     return len(busy) + quantidade_de_cells_a_lancar
-
-def __has_no_double_single(day_possibility) -> bool:
-    single_periodos_alocados: List = [x['quantidade_periodos_alocados'] for x in list(day_possibility.values()) if
-                                      x['quantidade_periodos_alocados'] == 1]
-
-    return len(single_periodos_alocados) < 2

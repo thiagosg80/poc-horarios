@@ -38,7 +38,8 @@ def __is_possible(quantidade_periodos_map, possibilidade_by_dia, turmas_by_turno
         for turma_by_turno in turmas_by_turno:
             quantidade_map = quantidade_periodos_map.get(turma_by_turno)
 
-            quantidade_map['quantidade_periodos_na_possibilidade'] += (possibilidade.get(turma_by_turno)
+            if turma_by_turno in possibilidade:
+                quantidade_map['quantidade_periodos_na_possibilidade'] += (possibilidade.get(turma_by_turno)
                                                                        .get('quantidade_periodos_alocados'))
 
     for item in list(quantidade_periodos_map.values()):

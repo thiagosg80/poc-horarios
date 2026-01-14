@@ -7,6 +7,10 @@ def fit(combined_grades, grade_template, grade_index: int) -> None:
                     possibility = combined[grade_index]
                     if periodo.dia in possibility:
                         possible_day = possibility[periodo.dia]
-                        possible_turma = possible_day[periodo.turma]
-                        possible_periodo = [ x for x in possible_turma['cells'] if x['periodo'] == periodo.ordem][0]
-                        periodo.descricao = possible_periodo['allocated']
+                        if periodo.turma in possible_day:
+                            possible_turma = possible_day[periodo.turma]
+
+                            possible_periodo = [ x for x in possible_turma['cells'] if x['periodo'] ==
+                                                 periodo.ordem][0]
+
+                            periodo.descricao = possible_periodo['allocated']
