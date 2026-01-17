@@ -3,6 +3,7 @@ from typing import List
 
 from function.get_dias_da_semana import get_dias_da_semana
 from function.to_grade import to_grade
+from model.sector import Sector
 from professor.model.disponibilidade import Disponibilidade
 from professor.model.professor import Professor
 from turma.function.fit import fit
@@ -62,10 +63,9 @@ def __add_grade_by_turno(grades_map, professor, turmas_do_professor, turno, turm
                                                                    professor.disponibilidades))
 
     disponibilidade_dias_da_semana = list(map(lambda i: i.dia, disponibilidades_by_turno))
-    template = __get_template(disponibilidade_dias_da_semana, turmas_by_turno, periodos_ordem)
 
-    sectors: List[dict] = get_sectors(template, professor, turmas_by_turno, disponibilidade_dias_da_semana,
-                                      periodos_ordem)
+    sectors: List[Sector] = get_sectors(professor, turmas_by_turno, disponibilidade_dias_da_semana, turno,
+                                        periodos_ordem)
 
     dias_by_sectors: List[dict] = get_dias_by_sectors(sectors, turmas_by_turno, disponibilidades_by_turno)
     grades_by_dias = get_grades_by_dias(dias_by_sectors, turmas_by_turno, turmas_map, professor.aulas)
@@ -79,16 +79,6 @@ def __get_turmas_by_turno(turno, turmas_map, turmas_do_professor) -> List[str]:
 
 def __turmas_by_turno_callback(turma_do_professor, turno, turmas_map) -> bool:
     return turmas_map.get(turma_do_professor).turno == turno
-
-
-def __get_template(dias_da_semana, turmas, periodos_ordem) -> List[dict]:
-    cells: List[dict] = []
-    for dia in dias_da_semana:
-        for turma in turmas:
-            for periodo_ordem in periodos_ordem:
-                cells.append(get_cell(dia, turma, periodo_ordem))
-
-    return cells
 
 
 def __get_grades_to_fit(grades_input: dict, limit: int) -> dict:

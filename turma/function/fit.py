@@ -10,7 +10,7 @@ def fit(combined_grades, grade_template, grade_index: int) -> None:
                         if periodo.turma in possible_day:
                             possible_turma = possible_day[periodo.turma]
 
-                            possible_periodo = [ x for x in possible_turma['cells'] if x['periodo'] ==
+                            possible_periodo = [ x for x in possible_turma['cells'] if x.position ==
                                                  periodo.ordem][0]
 
-                            periodo.descricao = possible_periodo['allocated']
+                            periodo.descricao = possible_periodo.allocation

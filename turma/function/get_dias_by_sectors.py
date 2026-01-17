@@ -1,21 +1,23 @@
-import random
+from itertools import chain
 from typing import List
 
 from function.get_dias_da_semana import get_dias_da_semana
+from model.cell import Cell
+from model.sector import Sector
 from turma.function.get_indexes_groups import get_indexes_groups
 
 
-def get_dias_by_sectors(sectors: List[dict], turmas_do_professor, disponibilidades_by_turno) -> List[dict]:
+def get_dias_by_sectors(sectors: List[Sector], turmas_do_professor, disponibilidades_by_turno) -> List[dict]:
     dias_da_semana: List[str] = get_dias_da_semana()
     dias_by_sectors: List[dict] = []
 
     for dia_da_semana in dias_da_semana:
         container_dias: List[dict] = []
-        sectors_by_dia_da_semana: List[dict] = [x for x in sectors if x['dia'] == dia_da_semana]
+        sectors_by_dia_da_semana: List[Sector] = [x for x in sectors if x.dia == dia_da_semana]
         for turma in turmas_do_professor:
-            sectors_by_dia_e_turma: List[dict] = [x for x in sectors_by_dia_da_semana if x['turma'] == turma]
+            sectors_by_dia_e_turma: List[Sector] = [x for x in sectors_by_dia_da_semana if x.turma == turma]
             if sectors_by_dia_e_turma:
-                cells: List[dict] = [x['cells'] for x in sectors_by_dia_e_turma]
+                cells = [x.cells for x in sectors_by_dia_e_turma]
                 container_dias.append({'dia': dia_da_semana, 'turma': turma, 'cells': cells})
 
         if container_dias:
@@ -45,7 +47,7 @@ def __get_dia_by_sectors(container_dias, indexes_groups, quantidade_periodos_dis
                 for cell in sector:
                     cells.append(cell)
 
-                quantidade_periodos_alocados = len([x for x in sector if x['allocated'] != ''])
+                quantidade_periodos_alocados = len([x for x in sector if x.allocation != ''])
 
                 possibilities[container['turma']] = {
                     'cells': sector,
@@ -66,8 +68,8 @@ def __is_possible(sector, cells, quantidade_periodos_disponiveis, i, indexes) ->
 
 def __no_simultaneos_periods(sector, cells) -> bool:
     for cell in sector:
-        repeated = [x for x in cells if x['periodo'] == cell['periodo'] and x['allocated'] != '' and
-                    cell['allocated'] != '']
+        repeated = [x for x in cells if x.position == cell.position and x.allocation != '' and
+                    cell.allocation != '']
 
         if repeated:
             return False
@@ -89,7 +91,7 @@ def __is_allocation_complete(sector, cells, quantidade_periodos_disponiveis, i, 
 
 
 def __get_future_cells_quantity(cells, sector) -> int:
-    busy: List[dict] = [x for x in cells if x['allocated'] != '']
-    quantidade_de_cells_a_lancar = len([x for x in sector if x['allocated'] != ''])
+    busy: List[dict] = [x for x in cells if x.allocation != '']
+    quantidade_de_cells_a_lancar = len([x for x in sector if x.allocation != ''])
 
     return len(busy) + quantidade_de_cells_a_lancar

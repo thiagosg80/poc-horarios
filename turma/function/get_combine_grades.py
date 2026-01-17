@@ -81,6 +81,6 @@ def __get_cell(container, dia_da_semana, turma_by_turno, periodo_ordem) -> dict:
     if dia_da_semana in container:
         dia = container[dia_da_semana]
         if turma_by_turno in dia:
-            return list([x for x in dia[turma_by_turno]['cells'] if x['periodo'] == periodo_ordem])[0]
+            return list([x for x in dia[turma_by_turno]['cells'] if x.position == periodo_ordem])[0]
 
     return get_cell(dia_da_semana, turma_by_turno, periodo_ordem)

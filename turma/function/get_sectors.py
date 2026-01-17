@@ -1,69 +1,130 @@
-from itertools import combinations
+from itertools import combinations, chain
 from typing import List
 
+from function.get_empty_sector import get_empty_sector
+from model.cell import Cell
+from model.sector import Sector
 from professor.model.aula import Aula
-from turma.function.get_cell import get_cell
+from professor.model.professor import Professor
 
 
-def get_sectors(template, professor, turmas, dias, periodos_ordem) -> List[dict]:
-    container: List[dict] = []
+def get_sectors(professor: Professor, turmas_by_turno: List[str], disponibilidade_dias_da_semana: List[str],
+                turno: str, periodos_ordens: List[int]) -> List[Sector]:
 
-    for dia in dias:
-        for turma in turmas:
-            disciplina: str = next(filter(lambda i: i.turma == turma, professor.aulas)).disciplina
-            periodos_to_fill = list(filter(lambda i: i['dia'] == dia and i['turma'] == turma, template))
-            __add_empty(container, periodos_to_fill, dia, turma)
-            aula: Aula = next(filter(lambda i: i.turma == turma and i.disciplina == disciplina, professor.aulas))
-            quantidade_maxima_periodos_consecutivos: int = aula.quantidade_maxima_periodos_consecutivos
+    callback = lambda i: __get_sectors_by_disponibilidade(i, turno, professor, turmas_by_turno, periodos_ordens)
+    result_map: map = map(callback, disponibilidade_dias_da_semana)
+    all_sectors_by_disponibilidade_raw: List[List[Sector]] = list(result_map)
+    all_sectors_by_disponibilidade: List[Sector] = list(chain.from_iterable(all_sectors_by_disponibilidade_raw))
+    turmas_map: dict = __get_turmas_map(professor.aulas)
+    sectors: List[Sector] = list(filter(lambda i: __is_ok(i, turmas_map), all_sectors_by_disponibilidade))
+    __add_empty(sectors, turmas_by_turno, disponibilidade_dias_da_semana, periodos_ordens)
 
-            for x in range(1, quantidade_maxima_periodos_consecutivos + 1):
-                sectors_by_periodos_quantity: List[dict] = []
-                all_possible_places: List = list(combinations(range(len(periodos_ordem)), x))
-                for indexes in all_possible_places:
-                    sector: List[dict] = []
-                    allocated_periodos_ordens: List[int] = []
-                    for index in indexes:
-                        __set_sector(sector, periodos_to_fill, index, dia, turma, professor, disciplina,
-                                     allocated_periodos_ordens)
-
-                    if __is_ok(allocated_periodos_ordens):
-                        sectors_by_periodos_quantity.append({'dia': dia, 'turma': turma, 'quantidade_periodos': x,
-                                                             'cells': sector})
-
-                [container.append(i) for i in sectors_by_periodos_quantity]
-
-    return container
+    return sectors
 
 
-def __add_empty(container, periodos_to_fill, dia, turma) -> None:
-    allocations: List[dict] = []
-    for periodo_to_fill in periodos_to_fill:
-        allocations.append(get_cell(dia, turma, periodo_to_fill['periodo']))
+def __get_sectors_by_disponibilidade(dia_disponibilidade: str, turno: str, professor: Professor,
+                                     turmas: List[str], periodos_ordens: List[int]) -> List[Sector]:
 
-    empty: dict = {'dia': dia, 'turma': turma, 'quantidade_periodos': 0, 'cells': allocations}
-    container.append(empty)
+    filtered: filter = filter(lambda i: i.turno == turno and i.dia == dia_disponibilidade, professor.disponibilidades)
+    quantidade_periodos_disponiveis: int = next(filtered).quantidade_de_periodos
+    quantidades_periodos: range = range(1, quantidade_periodos_disponiveis + 1)
+    callback = lambda i: __get_setores_by_disponibilidade(i, professor, dia_disponibilidade, turmas, periodos_ordens)
+    mapped: map = map(callback, quantidades_periodos)
+    result: List[List[Sector]] = list(mapped)
 
-
-def __set_sector(sector, periodos_to_fill, index, dia, turma, professor, disciplina,
-                 allocated_periodos_ordens) -> None:
-
-    is_empty: bool = len(sector) == 0
-    for x, periodo_to_fill in enumerate(periodos_to_fill):
-        description: str = professor.nome + ' - ' + disciplina if x == index else ''
-        if is_empty:
-            cell: dict = get_cell(dia, turma, periodo_to_fill['periodo'])
-            cell['allocated'] = description
-            sector.append(cell)
-            if description:
-                allocated_periodos_ordens.append(cell['periodo'])
-        else:
-            if description:
-                sector[x]['allocated'] = description
-                allocated_periodos_ordens.append(sector[x]['periodo'])
+    return list(chain.from_iterable(result))
 
 
-def __is_ok(allocated_periodos_ordens: List[int]) -> bool:
-    allocated_count = len(allocated_periodos_ordens)
+def __get_setores_by_disponibilidade(quantidade_disponivel: int, professor: Professor, dia: str,
+                                     turmas: List[str], periodos_ordens: List[int]) -> List[Sector]:
 
-    return (allocated_count == 1 or allocated_count == 2 or
-            allocated_count > 2 and len([x for x in allocated_periodos_ordens if x in [1, 3, 5]]) != 3)
+    callback = lambda i: __get_setores_by_turma(i, professor, dia, quantidade_disponivel, periodos_ordens)
+    mapped: map = map(callback, turmas)
+    result: List[List[Sector]] = list(mapped)
+
+    return list(chain.from_iterable(result))
+
+
+def __get_setores_by_turma(turma: str, professor: Professor, dia: str, quantidade_disponivel: int,
+                           periodos_ordens: List[int]) -> List[Sector]:
+
+    combinacoes: List[tuple] = list(combinations(periodos_ordens, quantidade_disponivel))
+    mapped: map = map(lambda i: __get_filled_sector(i, periodos_ordens, professor, dia, turma), combinacoes)
+
+    return list(mapped)
+
+
+def __get_filled_sector(combination: tuple, periodos_ordens: List[int], professor: Professor, dia: str,
+                        turma: str) -> Sector:
+
+    sector: Sector = get_empty_sector(periodos_ordens)
+    sector.dia = dia
+    sector.turma = turma
+    [__set_allocation(sector.cells, number - 1, professor) for number in combination]
+
+    return sector
+
+
+def __set_allocation(cells: List[Cell], position: int, professor: Professor) -> None:
+    cells[position].allocation = professor.nome + ' - ' + professor.disciplina
+
+
+def __get_turmas_map(aulas: List[Aula]) -> dict:
+    return {aula.turma: {'quantidade_maxima_periodos_consecutivos': aula.quantidade_maxima_periodos_consecutivos,
+                         'quantidade_minima_periodos_consecutivos': aula.quantidade_minima_periodos_consecutivos}
+            for aula in aulas}
+
+
+def __is_ok(sector: Sector, turmas_map: dict) -> bool:
+    turma: str = sector.turma
+    maxima: int = turmas_map.get(turma)['quantidade_maxima_periodos_consecutivos']
+    minima: int = turmas_map.get(turma)['quantidade_minima_periodos_consecutivos']
+    cells: List[Cell] = sector.cells
+    allocated: List[Cell] = list(filter(lambda i: i.allocation != '', cells))
+    allocated_positions: List[int] = list(map(lambda x: x.position, allocated))
+
+    return (__is_ok_quantidade_maxima_periodos_consecutivos(allocated_positions, maxima)
+            and __is_ok_quantidade_minima_periodos_consecutivos(allocated_positions, minima))
+
+
+def __is_ok_quantidade_maxima_periodos_consecutivos(allocated_positions: List[int], maxima: int) -> bool:
+    quantity_allocated: int = len(allocated_positions)
+
+    return quantity_allocated <= maxima or not __is_sequence(allocated_positions)
+
+
+def __is_ok_quantidade_minima_periodos_consecutivos(allocated_positions: List[int], minima: int) -> bool:
+    quantity_allocated: int = len(allocated_positions)
+
+    return minima == 1 or quantity_allocated >= minima and __is_sequence(allocated_positions)
+
+
+def __is_sequence(values: List[int]) -> bool:
+    first: int = values[0]
+
+    return values == list(range(first, first + len(values)))
+
+
+def __add_empty(container: List[Sector], turmas_by_turno: List[str], disponibilidade_dias_da_semana: List[str],
+                periodos_ordens: List[int]) -> None:
+
+    callback = lambda i: __get_empty_by_turma(i, disponibilidade_dias_da_semana, periodos_ordens)
+    nested: List[List[Sector]] = list(map(callback, turmas_by_turno))
+    empty_sectors: List[Sector] = list(chain.from_iterable(nested))
+    [container.append(empty_sector) for empty_sector in empty_sectors]
+
+
+def __get_empty_by_turma(turma: str, disponibilidade_dias_da_semana: List[str],
+                         periodos_ordens: List[int]) -> List[Sector]:
+
+    callback = lambda i: __get_empty_by_disponibilidade(i, turma, periodos_ordens)
+
+    return list(map(callback, disponibilidade_dias_da_semana))
+
+
+def __get_empty_by_disponibilidade(dia: str, turma: str, periodos_ordens: List[int]) -> Sector:
+    sector: Sector = get_empty_sector(periodos_ordens)
+    sector.dia = dia
+    sector.turma = turma
+
+    return sector
