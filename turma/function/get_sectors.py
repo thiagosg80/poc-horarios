@@ -78,25 +78,17 @@ def __get_turmas_map(aulas: List[Aula]) -> dict:
 def __is_ok(sector: Sector, turmas_map: dict) -> bool:
     turma: str = sector.turma
     maxima: int = turmas_map.get(turma)['quantidade_maxima_periodos_consecutivos']
-    minima: int = turmas_map.get(turma)['quantidade_minima_periodos_consecutivos']
     cells: List[Cell] = sector.cells
     allocated: List[Cell] = list(filter(lambda i: i.allocation != '', cells))
     allocated_positions: List[int] = list(map(lambda x: x.position, allocated))
 
-    return (__is_ok_quantidade_maxima_periodos_consecutivos(allocated_positions, maxima)
-            and __is_ok_quantidade_minima_periodos_consecutivos(allocated_positions, minima))
+    return __is_ok_quantidade_maxima_periodos_consecutivos(allocated_positions, maxima)
 
 
 def __is_ok_quantidade_maxima_periodos_consecutivos(allocated_positions: List[int], maxima: int) -> bool:
     quantity_allocated: int = len(allocated_positions)
 
     return quantity_allocated <= maxima or not __is_sequence(allocated_positions)
-
-
-def __is_ok_quantidade_minima_periodos_consecutivos(allocated_positions: List[int], minima: int) -> bool:
-    quantity_allocated: int = len(allocated_positions)
-
-    return minima == 1 or quantity_allocated >= minima and __is_sequence(allocated_positions)
 
 
 def __is_sequence(values: List[int]) -> bool:

@@ -7,46 +7,50 @@ from professor.model.professor import Professor
 
 def get_professores(turmas_map: dict) -> List[Professor]:
     return [
-        # __get_professor('andreia p', 'port', __get_turmas_01(), turmas_map, __get_disponibilidades_01()),
-        # __get_professor('josiane', 'mat', __get_turmas_02(), turmas_map, __get_disponibilidades_02()),
-        # __get_professor('patricia', 'mat', __get_turmas_03(), turmas_map, __get_disponibilidades_03()),
-        # __get_professor('cristian', 'geo', __get_turmas_04(), turmas_map, __get_disponibilidades_04()),
-        # __get_professor('jeferson', 'ingl', __get_turmas_04(), turmas_map, __get_disponibilidades_05()),
-        # __get_professor('robson', 'ef', __get_turmas_04(), turmas_map, __get_disponibilidades_06()),
-        # __get_professor('edson', 'hist', __get_turmas_04(), turmas_map, __get_disponibilidades_07()),
-        # __get_professor('crissiane', 'ic', __get_turmas_04(), turmas_map, __get_disponibilidades_08()),
-        # __get_professor('maristela', 'cie', __get_turmas_04(), turmas_map, __get_disponibilidades_09()),
-        # __get_professor('elaine', 'art', __get_turmas_04(), turmas_map, __get_disponibilidades_10()),
-        # __get_professor('lilian', 'er', __get_turmas_05(), turmas_map, __get_disponibilidades_11()),
-        # __get_professor('andrelise', 'er', __get_turmas_06(), turmas_map, __get_disponibilidades_12()),
-        # __get_professor('cristian', 'er', __get_turmas_07(), turmas_map, __get_disponibilidades_13()),
-        # __get_professor('lilian mat', 'mat', __get_turmas_08(), turmas_map, __get_disponibilidades_14()),
-        __get_professor('andreia s', 'port', __get_turmas_09(), turmas_map, __get_disponibilidades_15())
+        __get_professor('andreia p', 'port', __get_turmas_01(), turmas_map, __get_disponibilidades_01(), 1),
+        __get_professor('josiane', 'mat', __get_turmas_02(), turmas_map, __get_disponibilidades_02(), 1),
+        __get_professor('patricia', 'mat', __get_turmas_03(), turmas_map, __get_disponibilidades_03(), 1),
+        __get_professor('cristian', 'geo', __get_turmas_04(), turmas_map, __get_disponibilidades_04(), 1),
+        __get_professor('jeferson', 'ingl', __get_turmas_04(), turmas_map, __get_disponibilidades_05(), 1),
+        __get_professor('robson', 'ef', __get_turmas_04(), turmas_map, __get_disponibilidades_06(), 2),
+        __get_professor('edson', 'hist', __get_turmas_04(), turmas_map, __get_disponibilidades_07(), 1),
+        __get_professor('crissiane', 'ic', __get_turmas_04(), turmas_map, __get_disponibilidades_08(), 1),
+        __get_professor('maristela', 'cie', __get_turmas_04(), turmas_map, __get_disponibilidades_09(), 1),
+        __get_professor('elaine', 'art', __get_turmas_04(), turmas_map, __get_disponibilidades_10(), 1),
+        __get_professor('lilian', 'er', __get_turmas_05(), turmas_map, __get_disponibilidades_11(), 1),
+        __get_professor('andrelise', 'er', __get_turmas_06(), turmas_map, __get_disponibilidades_12(), 1),
+        __get_professor('cristian', 'er', __get_turmas_07(), turmas_map, __get_disponibilidades_13(), 1),
+        __get_professor('lilian mat', 'mat', __get_turmas_08(), turmas_map, __get_disponibilidades_14(), 1),
+        __get_professor('andreia s', 'port', __get_turmas_09(), turmas_map, __get_disponibilidades_15(), 1)
     ]
 
 
 def __get_professor(nome: str, disciplina: str, turmas: List[str], turmas_map: dict,
-                    disponibilidades: List[Disponibilidade]) -> Professor:
+                    disponibilidades: List[Disponibilidade],
+                    quantidade_minima_periodos_consecutivos: int) -> Professor:
 
     professor = Professor()
     professor.nome = nome
     professor.disciplina = disciplina
-    professor.aulas = __get_aulas(turmas, disciplina, turmas_map)
+    professor.aulas = __get_aulas(turmas, disciplina, turmas_map, quantidade_minima_periodos_consecutivos)
     professor.disponibilidades = disponibilidades
 
     return professor
 
 
-def __get_aulas(turmas: List[str], disciplina: str, turmas_map: dict) -> List[Aula]:
-    return list(map(lambda i: __get_aula(i, disciplina, turmas_map), turmas))
+def __get_aulas(turmas: List[str], disciplina: str, turmas_map: dict,
+                quantidade_minima_periodos_consecutivos: int) -> List[Aula]:
+
+    return list(map(lambda i: __get_aula(i, disciplina, turmas_map, quantidade_minima_periodos_consecutivos), turmas))
 
 
-def __get_aula(turma: str, disciplina: str, turmas_map: dict) -> Aula:
+def __get_aula(turma: str, disciplina: str, turmas_map: dict, quantidade_minima_periodos_consecutivos: int) -> Aula:
     aula = Aula()
     aula.turma = turma
     aula.disciplina = disciplina
     quantidade_periodos = turmas_map.get(turma).disciplina_map.get(disciplina).quantidade_periodos
     aula.quantidade_maxima_periodos_consecutivos = int(quantidade_periodos / 2) + 1
+    aula.quantidade_minima_periodos_consecutivos = quantidade_minima_periodos_consecutivos
 
     return aula
 
