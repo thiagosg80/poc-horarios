@@ -7,3 +7,4 @@ class Sector:
     turma: str = ''
     dia: str = ''
     cells: List[Cell] = []
+    quantidade_periodos_alocados: int = 0

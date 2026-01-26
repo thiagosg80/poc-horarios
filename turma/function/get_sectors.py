@@ -3,28 +3,34 @@ from itertools import combinations, chain
 from function.get_empty_sector import get_empty_sector
 from model.cell import Cell
 from model.sector import Sector
+from professor.model.aula import Aula
 from professor.model.professor import Professor
 
 
 def get_sectors(professor: Professor, turmas_by_turno: list[str], disponibilidade_dias_da_semana: list[str],
-                turno: str, periodos_ordens: list[int], quantidades_periodos_map: dict) -> list[Sector]:
+                periodos_ordens: list[int], quantidades_periodos_map: dict, turmas_map: dict) -> list[Sector]:
 
-    callback = lambda i: __get_sectors_by_disponibilidade(i, turno, professor, turmas_by_turno, periodos_ordens)
+    primeira_aula: Aula = professor.aulas[0]
+    turma: str = primeira_aula.turma
+    disciplina: str = primeira_aula.disciplina
+    quantidade_periodos_aula: int = turmas_map.get(turma).disciplina_map.get(disciplina).quantidade_periodos
+
+    callback = lambda i: __get_sectors_by_disponibilidade(i, professor, turmas_by_turno, periodos_ordens,
+                                                          quantidade_periodos_aula)
+
     result_map: map = map(callback, disponibilidade_dias_da_semana)
     all_sectors_by_disponibilidade_raw: list[list[Sector]] = list(result_map)
     all_sectors_by_disponibilidade: list[Sector] = list(chain.from_iterable(all_sectors_by_disponibilidade_raw))
-    is_ok_callback = lambda i: __is_ok(i, quantidades_periodos_map)
+    is_ok_callback = lambda i: __is_ok(i, quantidades_periodos_map, quantidade_periodos_aula)
     sectors: list[Sector] = list(filter(is_ok_callback, all_sectors_by_disponibilidade))
     __add_empty(sectors, turmas_by_turno, disponibilidade_dias_da_semana, periodos_ordens)
 
     return sectors
 
-def __get_sectors_by_disponibilidade(dia_disponibilidade: str, turno: str, professor: Professor,
-                                     turmas: list[str], periodos_ordens: list[int]) -> list[Sector]:
+def __get_sectors_by_disponibilidade(dia_disponibilidade: str, professor: Professor, turmas: list[str],
+                                     periodos_ordens: list[int], quantidade_periodos_aula: int) -> list[Sector]:
 
-    filtered: filter = filter(lambda i: i.turno == turno and i.dia == dia_disponibilidade, professor.disponibilidades)
-    quantidade_periodos_disponiveis: int = next(filtered).quantidade_de_periodos
-    quantidades_periodos: range = range(1, quantidade_periodos_disponiveis + 1)
+    quantidades_periodos: range = range(1, quantidade_periodos_aula + 1)
     callback = lambda i: __get_setores_by_disponibilidade(i, professor, dia_disponibilidade, turmas, periodos_ordens)
     mapped: map = map(callback, quantidades_periodos)
     result: list[list[Sector]] = list(mapped)
@@ -55,13 +61,14 @@ def __get_filled_sector(combination: tuple, periodos_ordens: list[int], professo
     sector.dia = dia
     sector.turma = turma
     [__set_allocation(sector.cells, number - 1, professor) for number in combination]
+    sector.quantidade_periodos_alocados = len(combination)
 
     return sector
 
 def __set_allocation(cells: list[Cell], position: int, professor: Professor) -> None:
     cells[position].allocation = professor.nome + ' - ' + professor.disciplina
 
-def __is_ok(sector: Sector, quantidades_periodos_map: dict) -> bool:
+def __is_ok(sector: Sector, quantidades_periodos_map: dict, quantidade_periodos_aula: int) -> bool:
     turma: str = sector.turma
     maxima: int = quantidades_periodos_map.get(turma)['quantidade_maxima_periodos_consecutivos']
     minima: int = quantidades_periodos_map.get(turma)['quantidade_minima_periodos_consecutivos']
@@ -70,7 +77,8 @@ def __is_ok(sector: Sector, quantidades_periodos_map: dict) -> bool:
     allocated_positions: list[int] = list(map(lambda x: x.position, allocated))
 
     return (__is_ok_quantidade_maxima_periodos_consecutivos(allocated_positions, maxima)
-            and __is_ok_pre_quantidade_minima_periodos_consecutivos(allocated_positions, minima))
+            and __is_ok_pre_quantidade_minima_periodos_consecutivos(allocated_positions, minima)
+            and __is_ok_intermitencia(allocated_positions, quantidade_periodos_aula))
 
 def __is_ok_quantidade_maxima_periodos_consecutivos(allocated_positions: list[int], maxima: int) -> bool:
     quantity_allocated: int = len(allocated_positions)
@@ -81,6 +89,20 @@ def __is_ok_pre_quantidade_minima_periodos_consecutivos(allocated_positions: lis
     quantity_allocated: int = len(allocated_positions)
 
     return quantity_allocated != minima or  __is_sequence(allocated_positions)
+
+def __is_ok_intermitencia(allocated_positions: list[int], quantidade_periodos_aula: int) -> bool:
+    return quantidade_periodos_aula < 3 or __is_ok_intermitencia_quantity_safe(allocated_positions)
+
+def __is_ok_intermitencia_quantity_safe(allocated_positions: list[int]) -> bool:
+    return not __is_intermitente(allocated_positions)
+
+def __is_intermitente(allocated_positions: list[int]) -> bool:
+    even_allocated_positions: list[int] = list(filter(lambda i: i % 2 == 0, allocated_positions))
+    odd_allocated_positions: list[int] = list(filter(lambda i: i % 2 != 0, allocated_positions))
+
+    return (len(allocated_positions) == len(even_allocated_positions)
+            or len(allocated_positions) == len(odd_allocated_positions)
+            or len(allocated_positions) == 2 and not __is_sequence(allocated_positions))
 
 def __is_sequence(values: list[int]) -> bool:
     first: int = values[0]

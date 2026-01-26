@@ -1,5 +1,3 @@
-from typing import List
-
 from turma.model.disciplina import Disciplina
 from turma.model.turma import Turma
 

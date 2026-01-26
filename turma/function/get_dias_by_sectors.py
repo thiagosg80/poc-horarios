@@ -1,80 +1,69 @@
-from function.get_dias_da_semana import get_dias_da_semana
+from itertools import product
+
 from model.sector import Sector
-from turma.function.get_indexes_groups import get_indexes_groups
 
 
-def get_dias_by_sectors(sectors: list[Sector], turmas_do_professor, disponibilidades_by_turno,
-                        quantidades_periodos_map) -> list[dict]:
+def get_dias_by_sectors(sectors: list[Sector], turmas_do_professor, disponibilidade_dias_da_semana: list[str],
+                        quantidades_periodos_map: dict, disponibilidade_map: dict) -> dict:
 
-    dias_da_semana: list[str] = get_dias_da_semana()
-    dias_by_sectors: list[dict] = []
+    all_days: dict = {d: __get_days(d, sectors, turmas_do_professor) for d in disponibilidade_dias_da_semana}
+    all_possibilities: dict = {d: __get_possibilities(all_days.get(d)) for d in disponibilidade_dias_da_semana}
+    first_mapped: dict = list(quantidades_periodos_map.values())[0]
+    quantidade_minima_periodos_consecutivos: int = first_mapped['quantidade_minima_periodos_consecutivos']
 
-    for dia_da_semana in dias_da_semana:
-        container_dias: list[dict] = []
-        sectors_by_dia_da_semana: list[Sector] = [x for x in sectors if x.dia == dia_da_semana]
-        for turma in turmas_do_professor:
-            sectors_by_dia_e_turma: list[Sector] = [x for x in sectors_by_dia_da_semana if x.turma == turma]
-            if sectors_by_dia_e_turma:
-                cells = [x.cells for x in sectors_by_dia_e_turma]
-                container_dias.append({'dia': dia_da_semana, 'turma': turma, 'cells': cells})
+    ok_possibilities: dict = {d: __get_ok_possibilities(all_possibilities.get(d),
+                                                        quantidade_minima_periodos_consecutivos,
+                                                        disponibilidade_map.get(d)) for d in
+                              disponibilidade_dias_da_semana}
 
-        if container_dias:
-            indexes_groups = get_indexes_groups(container_dias, 'cells')
-            disponibilidade_by_dia = [x for x in disponibilidades_by_turno if x.dia == dia_da_semana][0]
-            quantidade_periodos_disponiveis = disponibilidade_by_dia.quantidade_de_periodos
+    return {d: __get_mapped_by_turma(ok_possibilities.get(d)) for d in disponibilidade_dias_da_semana}
 
-            dia_by_sectors: list[dict] = __get_dia_by_sectors(container_dias, indexes_groups,
-                                                              quantidade_periodos_disponiveis)
+def __get_days(dia: str, sectors: list[Sector], turmas: list[str]) -> dict:
+    return {t: list(filter(lambda i: i.turma == t and i.dia == dia, sectors)) for t in turmas}
 
-            dias_by_sectors.append({'dia': dia_da_semana, 'possibilidades': dia_by_sectors})
+def __get_possibilities(days: dict) -> list[dict]:
+    return list(product(*list(days.values())))
 
-    return dias_by_sectors
+def __get_ok_possibilities(possibilities: list[tuple], quantidade_minima_periodos_consecutivos: int,
+                           quantidade_periodos_disponibilidade: int) -> list[dict]:
 
-def __get_dia_by_sectors(container_dias, indexes_groups, quantidade_periodos_disponiveis) -> list:
-    dias = []
-    for indexes in indexes_groups:
-        possibilities: dict = {}
-        cells: list[dict] = []
+    callback = lambda i: __is_ok(i, quantidade_minima_periodos_consecutivos, quantidade_periodos_disponibilidade)
 
-        for i, cell_index in enumerate(indexes):
-            container = container_dias[i]
-            sector = container['cells'][cell_index]
+    return list(filter(callback, possibilities))
 
-            if __is_possible(sector, cells, quantidade_periodos_disponiveis, i, indexes):
-                for cell in sector:
-                    cells.append(cell)
+def __is_ok(possibility: tuple, quantidade_minima_periodos_consecutivos: int,
+            quantidade_periodos_disponibilidade: int) -> bool:
 
-                quantidade_periodos_alocados = len([x for x in sector if x.allocation != ''])
+    return (__is_unconflicted(possibility)
+            and __has_enought_disponibility(possibility, quantidade_periodos_disponibilidade)
+            and __is_ok_quantidade_minima_periodos_consecutivos(possibility, quantidade_minima_periodos_consecutivos))
 
-                possibilities[container['turma']] = {
-                    'cells': sector,
-                    'quantidade_periodos_alocados': quantidade_periodos_alocados
-                }
+def __is_unconflicted(possibility: tuple) -> bool:
+    allocated: list[str] = []
+    [__add_allocated(allocated, sector) for sector in possibility]
 
-        if len(possibilities) == len(indexes):
-            dias.append(possibilities)
+    return len(allocated) == len(set(allocated))
 
-    return dias
+def __add_allocated(allocated: list[str], sector: Sector) -> None:
+    [allocated.append(sector.dia + str(cell.position)) for cell in sector.cells if cell.allocation != '']
 
-def __is_possible(sector, cells, quantidade_periodos_disponiveis, i, indexes) -> bool:
-    return (__no_simultaneos_periods(sector, cells) and
-            __has_disponibility(cells, sector, quantidade_periodos_disponiveis))
+def __has_enought_disponibility(possibility: tuple[Sector], quantidade_periodos_disponibilidade: int) -> bool:
+    quantidade_alocada: int = sum(list(map(lambda x: x.quantidade_periodos_alocados, possibility)))
 
-def __no_simultaneos_periods(sector, cells) -> bool:
-    for cell in sector:
-        repeated = [x for x in cells if x.position == cell.position and x.allocation != '' and
-                    cell.allocation != '']
+    return quantidade_alocada <= quantidade_periodos_disponibilidade
 
-        if repeated:
-            return False
+def __is_ok_quantidade_minima_periodos_consecutivos(possibility: tuple[Sector],
+                                                    quantidade_minima_periodos_consecutivos: int) -> bool:
 
-    return True
+    callback = lambda i: (i.quantidade_periodos_alocados != 0
+                          and i.quantidade_periodos_alocados < quantidade_minima_periodos_consecutivos)
 
-def __has_disponibility(cells, sector, quantidade_periodos_disponiveis) -> bool:
-    return __get_future_cells_quantity(cells, sector) <= quantidade_periodos_disponiveis
+    not_enought: list[Sector] = list(filter(callback, possibility))
 
-def __get_future_cells_quantity(cells, sector) -> int:
-    busy: list[dict] = [x for x in cells if x.allocation != '']
-    quantidade_de_cells_a_lancar = len([x for x in sector if x.allocation != ''])
+    return len(not_enought) < quantidade_minima_periodos_consecutivos
 
-    return len(busy) + quantidade_de_cells_a_lancar
+def __get_mapped_by_turma(possibilities: list[tuple]) -> list[dict]:
+    return list(map(lambda i: __get_mapped(i), possibilities))
+
+def __get_mapped(possibility: tuple[Sector]) -> dict:
+    return {s.turma: s for s in possibility}

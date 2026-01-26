@@ -1,38 +1,12 @@
+from turma.function.get_cell import get_cell
+import copy
 import random
-from itertools import product
 from typing import List
+
+from ortools.sat.python import cp_model
 
 from function.get_dias_da_semana import get_dias_da_semana
 from model.cell import Cell
-from turma.function.get_cell import get_cell
-from turma.function.get_periodos_ordens import get_periodos_ordens
-
-
-from itertools import product
-from typing import List
-from ortools.sat.python import cp_model
-
-from function.get_dias_da_semana import get_dias_da_semana
-from turma.function.get_cell import get_cell
-from turma.function.get_periodos_ordens import get_periodos_ordens
-
-
-import copy
-import random
-from itertools import product
-from typing import List
-
-from function.get_dias_da_semana import get_dias_da_semana
-from turma.function.get_cell import get_cell
-from turma.function.get_periodos_ordens import get_periodos_ordens
-
-
-from itertools import product
-from typing import List
-from ortools.sat.python import cp_model
-
-from function.get_dias_da_semana import get_dias_da_semana
-from turma.function.get_cell import get_cell
 from turma.function.get_periodos_ordens import get_periodos_ordens
 
 
@@ -159,35 +133,12 @@ def __get_turmas_by_turno(turno, turmas_map) -> List[str]:
     return list([x for x in turmas_map if turmas_map.get(x).turno == turno])
 
 
-def __get_indexes_groups(combined, current_grade) -> List[tuple]:
-    l1 = list(range(len(combined)))
-    l2 = list(range(len(current_grade)))
 
-    return list(product(l1, l2))
-
-def __get_result(to_combine, dias_da_semana, turmas_by_turno, periodos_ordens) -> dict:
-    result_dia: dict = {}
-    for dia_da_semana in dias_da_semana:
-        result_turma: dict = {}
-        for turma_by_turno in turmas_by_turno:
-            result_sector: List[dict] = []
-            for periodo_ordem in periodos_ordens:
-                cell_p1 = __get_cell(to_combine[0], dia_da_semana, turma_by_turno, periodo_ordem)
-                cell_p2 = __get_cell(to_combine[1], dia_da_semana, turma_by_turno, periodo_ordem)
-
-                if cell_p1['allocated'] and cell_p2['allocated']:
-                    return {}
-
-                result_sector.append(cell_p1) if cell_p1['allocated'] else result_sector.append(cell_p2)
-            result_turma[turma_by_turno] = {'cells': result_sector}
-        result_dia[dia_da_semana] = result_turma
-
-    return result_dia
 
 def __get_cell(container, dia_da_semana, turma_by_turno, periodo_ordem) -> dict:
     if dia_da_semana in container:
         dia = container[dia_da_semana]
         if turma_by_turno in dia:
-            return list([x for x in dia[turma_by_turno]['cells'] if x.position == periodo_ordem])[0]
+            return list([x for x in dia[turma_by_turno].cells if x.position == periodo_ordem])[0]
 
     return get_cell(dia_da_semana, turma_by_turno, periodo_ordem)
